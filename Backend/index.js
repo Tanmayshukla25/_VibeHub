@@ -60,7 +60,7 @@ const isDevelopment = process.env.NODE_ENV === "development";
 // ✅ Auto-choose frontend URL based on environment
 const frontendURL = isDevelopment
   ? process.env.FRONTEND_URL  // Vite default dev port
-  : RENDER_FRONTEND_URL // your Render frontend
+  : process.env.RENDER_FRONTEND_URL // your Render frontend
 
 // ✅ Allowed Origins
 const allowedOrigins = [frontendURL];
