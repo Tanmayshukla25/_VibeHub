@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 5000;
 
 
 const allowedOrigins = [
-  process.env.FRONTEND_URL, 
+  process.env.FRONTEND_URL," https://vibehub-1-65d1.onrender.com"
 ];
 
 const localhostRegex = /^http:\/\/localhost(:\d+)?$/;
