@@ -17,16 +17,17 @@ const localhostRegex = /^http:\/\/localhost(:\d+)?$/;
 
 const corsOptions = {
   origin: function (origin, callback) {
-    if (!origin) return callback(null, true); 
-    if (allowedOrigins.includes(origin) || localhostRegex.test(origin)) {
+    if (!origin || allowedOrigins.includes(origin) || localhostRegex.test(origin)) {
       callback(null, true);
     } else {
-      console.log(" Blocked by CORS:", origin);
+      console.log("Blocked by CORS:", origin);
       callback(new Error("Not allowed by CORS"));
     }
   },
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   credentials: true,
+  allowedHeaders: ["Content-Type", "Authorization"],
+  exposedHeaders: ["set-cookie"],
 };
 app.use(cookieParser());
 app.use(cors(corsOptions));
