@@ -1,6 +1,5 @@
 "use client";
-
-import { motion, useAnimation } from "framer-motion"; // ✅ use framer-motion instead of motion/react
+import { motion, useAnimation } from "framer-motion"; 
 import React, { useEffect } from "react"; 
 const checkVariants = {
   normal: {
@@ -21,11 +20,11 @@ export const CheckCheck = ({
   width = 28,
   height = 28,
   strokeWidth = 2,
-  stroke = "#22c55e", // Tailwind green-500
+  stroke = "#22c55e", 
 }) => {
   const controls = useAnimation();
 
-  // Play animation automatically once when rendered
+ 
   React.useEffect(() => {
     const playAnimation = async () => {
       await controls.start((i) => ({

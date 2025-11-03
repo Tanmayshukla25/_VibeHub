@@ -131,11 +131,10 @@ export const UserLogin = async (req, res) => {
   }
 };
 
-//userDob
-// ✅ Update DOB Controller
 
 
-// ✅ Update DOB Controller (Updated)
+
+// Update DOB Controller (Updated)
 export const updateDOB = async (req, res) => {
   try {
     const { userId, day, month, year } = req.body;
@@ -175,12 +174,12 @@ export const updateDOB = async (req, res) => {
 export const updateProfile = async (req, res) => {
   console.log("✅ Reached updateProfile controller");
   try {
-    const { id } = req.params;                 // expects :id route param
+    const { id } = req.params;                 
     const { bio } = req.body;
 
     console.log("User ID:", id);
     console.log("Bio:", bio);
-    console.log("File object:", req.file);     // multer -> file info
+    console.log("File object:", req.file);    
 
     const updatedData = {};
     if (bio !== undefined) updatedData.bio = bio;
