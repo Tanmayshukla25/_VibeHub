@@ -21,8 +21,8 @@ export const sendVerificationCode = async (req, res) => {
 
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
+      port: 587,
+      secure: false,
       auth: {
         user: "tanmayshukla252@gmail.com",
         pass: "pnsf eebx hmzw xeex",

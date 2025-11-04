@@ -13,7 +13,7 @@ const allowedOrigins = [
 ];
 
 const localhostRegex = /^http:\/\/localhost(:\d+)?$/;
-
+  
 
 const corsOptions = {
   origin: function (origin, callback) {

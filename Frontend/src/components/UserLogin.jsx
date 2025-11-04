@@ -202,7 +202,7 @@ const Login = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              className="bg-blue-400 text-white w-full py-1.5 rounded-lg font-semibold text-sm hover:bg-blue-500 disabled:bg-blue-200 transition"
+              className="bg-blue-400 cursor-pointer text-white w-full py-1.5 rounded-lg font-semibold text-sm hover:bg-blue-500 disabled:bg-blue-200 transition"
               disabled={isFormInvalid}
             >
               Log in

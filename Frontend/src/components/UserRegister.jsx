@@ -288,7 +288,7 @@ const Register = () => {
 
               <button
                 type="submit"
-                className="bg-gradient-to-tr from-[#22c55e] via-[#0e7490] to-[#3b82f6] text-white w-full py-1.5 mt-3 rounded-lg font-semibold text-sm hover:bg-green-500 disabled:bg-green-200 transition"
+                className=" cursor-pointer bg-gradient-to-tr from-[#22c55e] via-[#0e7490] to-[#3b82f6] text-white w-full py-1.5 mt-3 rounded-lg font-semibold text-sm hover:bg-green-500 disabled:bg-green-200 transition"
                 disabled={isFormInvalid}
               >
                 Sign up
@@ -296,7 +296,7 @@ const Register = () => {
             </form>
           </div>
 
-          <div className="rounded-b-2xl bg-gradient-to-bl from-[#ffe4e6] to-[#ccfbf1] p-5 w-full mt-2 text-center text-sm shadow-xl">
+          <div className="rounded-b-2xl  bg-gradient-to-bl from-[#ffe4e6] to-[#ccfbf1] p-5 w-full mt-2 text-center text-sm shadow-xl">
             <p>
               Have an account?{" "}
               <Link
