@@ -123,8 +123,8 @@ export const UserLogin = async (req, res) => {
     res
       .cookie("userToken", token, {
         httpOnly: true,
-        secure: false,
-        sameSite: "lax",
+        secure: true,
+        sameSite: "none",
         path: "/",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       })
