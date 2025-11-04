@@ -1,18 +1,20 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import instance from "../axiosConfig";
 import mail from "../assets/mail.png";
 import { CheckCheck } from "../components/CheckCheck";
+
 const MailConfirm = () => {
   const [userEmail, setUserEmail] = useState("");
-  const [confirmationCode, setConfirmationCode] = useState("");
+  const [otpValues, setOtpValues] = useState(["", "", "", "","",""]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
 
   const location = useLocation();
   const navigate = useNavigate();
   const userId = location.state?.userId;
+  const inputRefs = useRef([]);
 
   useEffect(() => {
     const storedEmail = localStorage.getItem("userEmail");
@@ -26,12 +28,32 @@ const MailConfirm = () => {
     }
   }, [userId, navigate]);
 
+
+  const handleOtpChange = (e, index) => {
+    const value = e.target.value.replace(/[^0-9]/g, ""); 
+    const newOtp = [...otpValues];
+    newOtp[index] = value;
+    setOtpValues(newOtp);
+
+    if (value && index < newOtp.length - 1) {
+      inputRefs.current[index + 1].focus();
+    }
+  };
+
+  const handleOtpKeyDown = (e, index) => {
+    if (e.code === "Backspace" && !otpValues[index] && index > 0) {
+      inputRefs.current[index - 1].focus();
+    }
+  };
+
   const handleNext = async () => {
     setMessage({ text: "", type: "" });
 
-    if (!confirmationCode.trim()) {
+    const confirmationCode = otpValues.join("").trim();
+
+    if (confirmationCode.length < 6) {
       setMessage({
-        text: "Please enter the confirmation code.",
+        text: "Please enter the 4-digit confirmation code.",
         type: "error",
       });
       return;
@@ -118,14 +140,21 @@ const MailConfirm = () => {
             </button>
           </p>
 
-          <input
-            type="text"
-            placeholder="Enter confirmation code"
-            value={confirmationCode}
-            onChange={(e) => setConfirmationCode(e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 text-base"
-            maxLength={6}
-          />
+        
+          <div className="flex justify-center gap-3 mt-4">
+            {otpValues.map((val, index) => (
+              <input
+                key={index}
+                type="text"
+                maxLength="1"
+                value={val}
+                onChange={(e) => handleOtpChange(e, index)}
+                onKeyDown={(e) => handleOtpKeyDown(e, index)}
+                ref={(el) => (inputRefs.current[index] = el)}
+                className="w-12 h-12 text-center border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-lg font-semibold shadow-sm transition duration-150"
+              />
+            ))}
+          </div>
 
           {message.text && (
             <div

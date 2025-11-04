@@ -9,7 +9,7 @@ const UserSchema = new mongoose.Schema(
 
     profilePic: {
       type: String,
-      default: "https://res.cloudinary.com/default-profile-pic.png",
+      default: "/assets/defaultpic.png",
     },
     bio: { type: String, default: "" },
     website: { type: String, default: "" },

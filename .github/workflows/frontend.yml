@@ -1,0 +1,61 @@
+name: VibeHub Frontend CI/CD — Azure Web App
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'Frontend/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'Frontend/**'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest 
+    defaults:
+      run:
+        working-directory: ./Frontend
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: './package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          CI: false
+
+      - name: Deploy to Azure Web App (Frontend)
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ secrets.AZURE_WEBAPP_NAME_FRONTEND }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_FRONTEND }}
+          package: './dist'
+
+      - name: Upload build artifact (optional)
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: ./dist
+
+# Notes:
+# - Create an Azure Web App (Linux) for the frontend and add its publish profile
+#   into the repository secrets as `AZURE_WEBAPP_PUBLISH_PROFILE_FRONTEND`.
+# - Also set `AZURE_WEBAPP_NAME_FRONTEND` to the Web App name (or save it as a
+#   repository secret too). The workflow uses the `azure/webapps-deploy` action
+#   and deploys the built `dist` folder.

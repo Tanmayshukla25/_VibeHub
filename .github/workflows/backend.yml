@@ -1,0 +1,55 @@
+name: Backend CI/CD — Azure Web App
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'Backend/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'Backend/**'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./Backend
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: './package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests (if any)
+        run: |
+          if [ -f package.json ] && grep -q "test" package.json; then
+            npm test || true
+          fi
+
+      - name: Deploy to Azure Web App (Backend)
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ secrets.AZURE_WEBAPP_NAME_BACKEND }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_BACKEND }}
+          package: '.'
+
+# Notes:
+# - Create an Azure Web App for the backend and add its publish profile into
+#   repository secrets as `AZURE_WEBAPP_PUBLISH_PROFILE_BACKEND`.
+# - Also set `AZURE_WEBAPP_NAME_BACKEND` to the Web App name (or save it as a
+#   repository secret too). The workflow deploys the Backend folder contents.

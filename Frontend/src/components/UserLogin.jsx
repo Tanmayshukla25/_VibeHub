@@ -31,26 +31,73 @@ const AnimatedText = ({ text, speed, className, style }) => {
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
+  const [emailError, setEmailError] = useState("");
+  const [passwordStrength, setPasswordStrength] = useState(0);
+  const [passwordError, setPasswordError] = useState("");
   const navigate = useNavigate();
 
+  // 🧠 Handle input change + validation
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+
+    if (name === "email") {
+      if (value && !/^[\w.+-]+@gmail\.com$/.test(value)) {
+        setEmailError("Please enter a valid Gmail address (e.g., user@gmail.com)");
+      } else {
+        setEmailError("");
+      }
+    }
+
+    if (name === "password") {
+      let strength = 0;
+      if (value.length >= 8) strength++;
+      if (/[A-Z]/.test(value)) strength++;
+      if (/[a-z]/.test(value)) strength++;
+      if (/[0-9]/.test(value)) strength++;
+      if (/[^A-Za-z0-9]/.test(value)) strength++;
+      setPasswordStrength(strength);
+      setPasswordError(value.length < 8 ? "Password must be at least 8 characters" : "");
+    }
   };
 
+  const getPasswordStrengthColor = () => {
+    if (passwordStrength <= 2) return "bg-red-500";
+    if (passwordStrength <= 3) return "bg-yellow-500";
+    return "bg-green-500";
+  };
+
+  const getPasswordStrengthText = () => {
+    if (passwordStrength <= 2) return "Weak";
+    if (passwordStrength <= 3) return "Medium";
+    return "Strong";
+  };
+
+  // 🚀 Submit handler
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (emailError || passwordError) {
+      toast.error("Please fix validation errors before logging in.");
+      return;
+    }
+
     try {
       const res = await instance.post("/user/login", formData);
       toast.success("Login successful!");
-      console.log(res.data);
+      localStorage.setItem("token", res.data.token);
       navigate("/Home");
     } catch (error) {
       toast.error(error.response?.data?.message || "Login failed");
     }
   };
 
+  const isFormInvalid =
+    !formData.email || !formData.password || emailError || passwordError;
+
   return (
     <div className="flex justify-between items-center h-screen w-screen bg-gradient-to-tl from-[#a2d2df] via-[#f6efbd] to-[#e4c087] px-20 relative overflow-hidden">
+      {/* Left Illustration Section */}
       <div className="hidden lg:flex relative items-center justify-center h-full">
         <AnimatedText
           text="VibeHub"
@@ -69,6 +116,7 @@ const Login = () => {
         />
       </div>
 
+      {/* Login Form Section */}
       <motion.div
         initial={{ opacity: 0, scale: 0.8, y: 50 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -89,21 +137,28 @@ const Login = () => {
           </h1>
 
           <form onSubmit={handleSubmit} className="w-full">
+            {/* Email Field */}
             <input
               type="text"
               name="email"
-              placeholder="Phone number, username, or email address"
+              placeholder="Enter your Gmail address"
               onChange={handleChange}
-              className="w-full border border-gray-300 bg-gray-50 p-2 text-sm mb-2 rounded focus:ring-0 focus:border-gray-400"
+              value={formData.email}
+              className="w-full border border-gray-300 bg-gray-50 p-2 text-sm mb-1 rounded focus:ring-0 focus:border-gray-400"
               required
             />
+            {emailError && (
+              <p className="text-red-500 text-xs mb-2">{emailError}</p>
+            )}
 
-            <div className="relative mb-4">
+            {/* Password Field */}
+            <div className="relative mb-2">
               <input
                 type={showPassword ? "text" : "password"}
                 name="password"
-                placeholder="Password"
+                placeholder="Password (min 8 chars)"
                 onChange={handleChange}
+                value={formData.password}
                 className="w-full border border-gray-300 bg-gray-50 p-2 text-sm rounded focus:ring-0 focus:border-gray-400 pr-10"
                 required
               />
@@ -115,10 +170,40 @@ const Login = () => {
               </span>
             </div>
 
+            {/* Password Validation Feedback */}
+            {passwordError && (
+              <p className="text-red-500 text-xs mt-1">{passwordError}</p>
+            )}
+            {formData.password && (
+              <div className="w-full mt-1 mb-2">
+                <div className="flex justify-between text-xs text-gray-600">
+                  <span>Password Strength:</span>
+                  <span
+                    className={`font-medium ${
+                      passwordStrength <= 2
+                        ? "text-red-500"
+                        : passwordStrength <= 3
+                        ? "text-yellow-500"
+                        : "text-green-500"
+                    }`}
+                  >
+                    {getPasswordStrengthText()}
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 h-2 rounded-full">
+                  <div
+                    className={`h-2 rounded-full transition-all duration-300 ${getPasswordStrengthColor()}`}
+                    style={{ width: `${(passwordStrength / 5) * 100}%` }}
+                  ></div>
+                </div>
+              </div>
+            )}
+
+            {/* Submit Button */}
             <button
               type="submit"
               className="bg-blue-400 text-white w-full py-1.5 rounded-lg font-semibold text-sm hover:bg-blue-500 disabled:bg-blue-200 transition"
-              disabled={!formData.email || !formData.password}
+              disabled={isFormInvalid}
             >
               Log in
             </button>
@@ -131,13 +216,14 @@ const Login = () => {
           </div>
 
           <Link
-            to="/forgot-password"
+           
             className="text-xs text-blue-900 hover:underline"
           >
             Forgotten your password?
           </Link>
         </motion.div>
 
+        {/* Footer Section */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -156,6 +242,7 @@ const Login = () => {
         </motion.div>
       </motion.div>
 
+      {/* Footer Branding */}
       <div className="absolute bottom-4 w-full text-center text-xs text-gray-700">
         <p>From Meta</p>
       </div>
