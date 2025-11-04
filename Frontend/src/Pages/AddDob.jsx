@@ -19,25 +19,12 @@ const AddDob = () => {
   }
 
   const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
   ];
 
   const days = Array.from({ length: 31 }, (_, i) => i + 1);
-  const years = Array.from(
-    { length: 100 },
-    (_, i) => new Date().getFullYear() - i
-  );
+  const years = Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -47,10 +34,7 @@ const AddDob = () => {
 
   const handleNext = async () => {
     if (!dob.month || !dob.day || !dob.year) {
-      setMessage({
-        text: "Please select your full date of birth.",
-        type: "error",
-      });
+      setMessage({ text: "Please select your full date of birth.", type: "error" });
       return;
     }
 
@@ -74,7 +58,6 @@ const AddDob = () => {
       });
 
       console.log("DOB Update Response:", response.data);
-
       setMessage({
         text: "🎉 Date of birth updated successfully!",
         type: "success",
@@ -114,6 +97,32 @@ const AddDob = () => {
       setLoading(false);
     }
   };
+
+  // ✨ Loader component (Framer Motion spinner)
+  const Loader = () => (
+    <motion.div
+      className="flex justify-center items-center space-x-2"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
+      <motion.div
+        className="w-4 h-4 bg-white rounded-full"
+        animate={{ y: [0, -6, 0] }}
+        transition={{ duration: 0.6, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.div
+        className="w-4 h-4 bg-white rounded-full"
+        animate={{ y: [0, -6, 0] }}
+        transition={{ duration: 0.6, delay: 0.2, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.div
+        className="w-4 h-4 bg-white rounded-full"
+        animate={{ y: [0, -6, 0] }}
+        transition={{ duration: 0.6, delay: 0.4, repeat: Infinity, ease: "easeInOut" }}
+      />
+    </motion.div>
+  );
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-tl from-[#a2d2df] via-[#f6efbd] to-[#e4c087]">
@@ -194,11 +203,11 @@ const AddDob = () => {
           disabled={loading}
           className={`mt-6 w-full ${
             loading
-              ? "bg-gray-400 cursor-not-allowed"
+              ? "bg-gradient-to-r from-gray-400 to-gray-500 cursor-not-allowed"
               : "bg-gradient-to-r from-[#374151] via-[#f43f5e] to-[#fb923c]"
           } text-white font-semibold py-2 rounded-lg transition`}
         >
-          {loading ? "Updating..." : "Next"}
+          {loading ? <Loader /> : "Next"}
         </button>
 
         <Link to="/Register">

@@ -17,6 +17,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import instance from "../axiosConfig";
 import { useNavigate } from "react-router-dom";
 import{Link} from "react-router-dom";
+import VibeHubLogo from "../assets/VibeHub.png";
 
 const Sidebar = () => {
   const [active, setActive] = useState("Home");
@@ -79,18 +80,8 @@ const Sidebar = () => {
       </AnimatePresence>
       <div className="h-screen w-[250px] border-r border-gray-200 flex flex-col justify-between fixed bg-gradient-to-tl from-[#a2d2df] via-[#f6efbd] to-[#e4c087]">
         <div>
-          <div className="px-6 py-6">
-            <h1
-              className="text-4xl font-bold "
-              style={{ fontFamily: "Billabong, cursive" }}
-            >
-              <span className="bg-gradient-to-r from-[#0f172a] to-[#334155] bg-clip-text text-transparent">
-                Vibe
-              </span>
-              <span className="bg-gradient-to-r from-[#334155] to-[#475569] bg-clip-text text-transparent">
-                Hub
-              </span>
-            </h1>
+          <div className="w-[210px] h-[130px]">
+          <img src={VibeHubLogo} className=" w-full h-full" alt="" />
           </div>
 
           <ul className="space-y-3 px-4">
