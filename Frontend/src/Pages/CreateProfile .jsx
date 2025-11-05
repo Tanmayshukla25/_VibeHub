@@ -1,6 +1,8 @@
+// CreateProfile.jsx
 import { useState, useEffect } from "react";
 import { Camera, User } from "lucide-react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, Link } from "react-router-dom";
+import VibeHubLogo from "../assets/VibeHub.png";
 import instance from "../axiosConfig";
 
 const CreateProfile = () => {
@@ -77,10 +79,17 @@ const CreateProfile = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gradient-to-tl from-[#a2d2df] via-[#f6efbd] to-[#e4c087] p-4">
-      <div className="bg-gradient-to-bl from-[#ffe4e6] to-[#ccfbf1] w-full max-w-md p-8 rounded-3xl shadow-2xl text-center backdrop-blur-sm border border-white/20">
+    <div className="relative flex justify-center items-center min-h-screen bg-gradient-to-tl from-[#a2d2df] via-[#f6efbd] to-[#e4c087] p-4">
+      {/* Floating logo at top */}
+      <div className="absolute top-6 left-1/2 transform -translate-x-1/2 flex flex-col items-center z-20">
+        <Link to="/" className="flex items-center">
+          <img src={VibeHubLogo} alt="VibeHub Logo" className="w-28 sm:w-32 mb-1 drop-shadow-lg" />
+        </Link>
+      </div>
+
+      <div className="bg-gradient-to-bl from-[#ffe4e6] to-[#ccfbf1] w-full max-w-md p-8 rounded-3xl shadow-2xl text-center backdrop-blur-sm border border-white/20 mt-16">
         <div className="mb-8">
-          <h2 className="text-3xl font-bold mb-2 bg-gradient-to-l from-blue-500 via-teal-500 to-green-500 text-transparent bg-clip-text bg-clip-text text-transparent">
+          <h2 className="text-3xl font-bold mb-2 bg-gradient-to-l from-blue-500 via-teal-500 to-green-500 text-transparent bg-clip-text">
             Create Your Profile
           </h2>
           <p className="text-gray-600 text-sm">Show the world your vibe ✨</p>

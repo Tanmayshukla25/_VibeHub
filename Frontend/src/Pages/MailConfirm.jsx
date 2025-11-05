@@ -1,8 +1,10 @@
+// MailConfirm.jsx
 import React, { useState, useEffect, useRef } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import instance from "../axiosConfig";
 import mail from "../assets/mail.png";
+import VibeHubLogo from "../assets/VibeHub.png";
 import { CheckCheck } from "../components/CheckCheck";
 
 const MailConfirm = () => {
@@ -110,6 +112,13 @@ const MailConfirm = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-tl from-[#a2d2df] via-[#f6efbd] to-[#e4c087] flex flex-col items-center justify-center p-4 sm:p-6 font-sans">
+      {/* Logo */}
+      <div className="mb-4 flex flex-col items-center">
+        <Link to="/" className="flex items-center">
+          <img src={VibeHubLogo} alt="VibeHub Logo" className="w-28 sm:w-32 mb-1 drop-shadow-md" />
+        </Link>
+      </div>
+
       <motion.div
         initial={{ opacity: 0, scale: 0.7, y: 50 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}

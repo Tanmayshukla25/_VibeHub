@@ -1,7 +1,9 @@
+// AddDob.jsx
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import cakeImg from "../assets/cake.png";
+import VibeHubLogo from "../assets/VibeHub.png";
 import instance from "../axiosConfig";
 
 const AddDob = () => {
@@ -125,7 +127,14 @@ const AddDob = () => {
   );
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-tl from-[#a2d2df] via-[#f6efbd] to-[#e4c087]">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-tl from-[#a2d2df] via-[#f6efbd] to-[#e4c087] p-4">
+      {/* Logo + optional title */}
+      <div className="mb-4 flex flex-col items-center">
+        <Link to="/" className="flex flex-col items-center">
+          <img src={VibeHubLogo} alt="VibeHub Logo" className="w-28 sm:w-32 mb-1 drop-shadow-md" />
+        </Link>
+      </div>
+
       <motion.div
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}

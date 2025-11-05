@@ -307,7 +307,7 @@ const UserProfile = () => {
    
       <div className="flex justify-center items-center  p-4">
         <div className="w-full max-w-md  text-center ">
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center justify-between gap-5 mb-8">
             <div className="relative group">
               {auth?._id === user?.id ? (
                 <label
@@ -324,7 +324,7 @@ const UserProfile = () => {
                     />
                   </div>
                   <div
-                    className={`absolute bottom-13 right-5 bg-gradient-to-r from-[#4ade80] via-[#14b8a6] to-[#0891b2] p-2.5 rounded-full shadow-lg transition-all duration-300 ${
+                    className={`absolute bottom-13 right-0 bg-gradient-to-r from-[#4ade80] via-[#14b8a6] to-[#0891b2] p-2.5 rounded-full shadow-lg transition-all duration-300 ${
                       isHovered ? "scale-110" : ""
                     }`}
                   >
@@ -349,7 +349,7 @@ const UserProfile = () => {
                   </div>
                 </div>
               )}
-              <p className="text-sm text-gray-600 mt-3 mr-15">{user?.username}</p>
+              <p className="text-sm text-gray-600 mt-3 mr-6">{user?.username}</p>
               <p className="text-xs text-gray-500 mt-1 "><span className="font-bold text-black"> Bio:-</span> {user?.bio}</p>
             </div>
 
