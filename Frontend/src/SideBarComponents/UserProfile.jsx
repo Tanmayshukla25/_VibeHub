@@ -277,7 +277,7 @@ const UserProfile = () => {
                     />
                   </div>
                   <div
-                    className={`absolute bottom-12 right-0 bg-blue-600 p-2.5 rounded-full shadow-lg transition-all duration-300 ${
+                    className={`absolute bottom-13 right-5 bg-blue-600 p-2.5 rounded-full shadow-lg transition-all duration-300 ${
                       isHovered ? "scale-110" : ""
                     }`}
                   >
