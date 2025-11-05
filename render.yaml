@@ -29,7 +29,7 @@ services:
         fromService:
           name: vibehub-frontend
           type: web
-          property: url
+          property: host
 
   # Frontend Service Configuration
   - type: web
@@ -46,4 +46,4 @@ services:
         fromService:
           name: vibehub-backend
           type: web
-          property: url
+          property: host
