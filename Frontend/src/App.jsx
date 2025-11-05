@@ -11,6 +11,7 @@ import FrontPage from "./SideBarComponents/FrontPage";
 import ProtectedRoute from "./ProtectedRoute";
 import UserProfile from "./SideBarComponents/UserProfile";
 import { UserContext } from "./UserContext"; 
+import SearchBar from "./SideBarComponents/searchBar";
 
 const App = () => {
  
@@ -38,6 +39,7 @@ const App = () => {
         { index: true, element: <FrontPage /> },
         { path: "/home/explore", element: <Explore /> },
         { path: "/home/UserProfile", element: <UserProfile /> },
+        { path: "/home/SearchBar", element: <SearchBar/> },
       ],
     },
   ]);

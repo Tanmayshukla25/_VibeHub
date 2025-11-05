@@ -98,18 +98,19 @@ const Sidebar = () => {
                 <span>Home</span>
               </li>
             </Link>
-
-            <li
-              onClick={() => setActive("Search")}
-              className={`flex items-center gap-4 cursor-pointer px-3 mt-2 py-2 rounded-xl transition-all duration-200 ${
-                active === "Search"
-                  ? "bg-gray-100 font-semibold"
-                  : "hover:bg-gray-100"
-              }`}
-            >
-              <Search size={24} />
-              <span>Search</span>
-            </li>
+            <Link to="/home/SearchBar">
+              <li
+                onClick={() => setActive("Search")}
+                className={`flex items-center gap-4 cursor-pointer px-3 mt-2 py-2 rounded-xl transition-all duration-200 ${
+                  active === "Search"
+                    ? "bg-gray-100 font-semibold"
+                    : "hover:bg-gray-100"
+                }`}
+              >
+                <Search size={24} />
+                <span>Search</span>
+              </li>
+            </Link>
             <Link to="/home/explore">
               <li
                 onClick={() => setActive("Explore")}

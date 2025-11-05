@@ -277,7 +277,7 @@ const UserProfile = () => {
                     />
                   </div>
                   <div
-                    className={`absolute bottom-13 right-5 bg-blue-600 p-2.5 rounded-full shadow-lg transition-all duration-300 ${
+                    className={`absolute bottom-13 right-5 bg-gradient-to-r from-[#4ade80] via-[#14b8a6] to-[#0891b2] p-2.5 rounded-full shadow-lg transition-all duration-300 ${
                       isHovered ? "scale-110" : ""
                     }`}
                   >
@@ -340,7 +340,7 @@ const UserProfile = () => {
               className={`w-full py-2 rounded-lg text-white font-semibold transition-all ${
                 uploading
                   ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
+                  : "bg-gradient-to-r from-[#2dd4bf]  to-[#1f2937] hover:from-blue-700 hover:to-blue-800"
               }`}
             >
               {uploading ? "Uploading..." : "Save Image"}
@@ -358,7 +358,7 @@ const UserProfile = () => {
             {auth?._id === user?.id && (
               <button
                 onClick={openEditModal}
-                className="bg-gray-100 hover:bg-gray-200 text-sm px-5 py-2 rounded-lg font-medium border border-gray-300 transition"
+                className=" text-white bg-gradient-to-r from-[#2dd4bf]  to-[#1f2937] hover:bg-gray-200 text-sm px-5 py-2 rounded-lg font-medium border border-gray-300 transition"
               >
                 Edit Profile
               </button>

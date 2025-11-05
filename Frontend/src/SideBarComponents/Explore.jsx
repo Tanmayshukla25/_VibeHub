@@ -61,7 +61,7 @@ const Explore = () => {
             />
 
             <h2 className="mt-3 font-semibold text-lg">{user.name}</h2>
-            <p className="text-gray-500 text-sm">@{user.username}</p>
+            <p className="text-gray-500 text-sm">{user.username}</p>
             <p className="text-gray-400 text-xs mt-1">{user.bio}</p>
 
             <button
@@ -69,7 +69,7 @@ const Explore = () => {
               className={`mt-4 px-5 py-2 rounded-full font-medium transition-all duration-300 ${
                 followedUsers.includes(user._id)
                   ? "bg-gray-200 text-gray-800"
-                  : "bg-blue-600 text-white hover:bg-blue-700"
+                  : "bg-gradient-to-r from-[#2dd4bf]  to-[#1f2937] text-white hover:bg-blue-700"
               }`}
             >
               {followedUsers.includes(user._id) ? "Following" : "Follow"}

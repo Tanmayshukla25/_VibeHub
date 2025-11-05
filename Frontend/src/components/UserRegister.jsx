@@ -288,7 +288,7 @@ const Register = () => {
 
               <button
                 type="submit"
-                className=" cursor-pointer bg-gradient-to-tr from-[#22c55e] via-[#0e7490] to-[#3b82f6] text-white w-full py-1.5 mt-3 rounded-lg font-semibold text-sm hover:bg-green-500 disabled:bg-green-200 transition"
+                className=" cursor-pointer bg-gradient-to-r from-[#4ade80] via-[#14b8a6] to-[#0891b2] text-white w-full py-1.5 mt-3 rounded-lg font-semibold text-sm hover:bg-green-500 disabled:bg-green-200 transition"
                 disabled={isFormInvalid}
               >
                 Sign up

@@ -43,7 +43,9 @@ const Login = () => {
 
     if (name === "email") {
       if (value && !/^[\w.+-]+@gmail\.com$/.test(value)) {
-        setEmailError("Please enter a valid Gmail address (e.g., user@gmail.com)");
+        setEmailError(
+          "Please enter a valid Gmail address (e.g., user@gmail.com)"
+        );
       } else {
         setEmailError("");
       }
@@ -57,7 +59,9 @@ const Login = () => {
       if (/[0-9]/.test(value)) strength++;
       if (/[^A-Za-z0-9]/.test(value)) strength++;
       setPasswordStrength(strength);
-      setPasswordError(value.length < 8 ? "Password must be at least 8 characters" : "");
+      setPasswordError(
+        value.length < 8 ? "Password must be at least 8 characters" : ""
+      );
     }
   };
 
@@ -199,11 +203,15 @@ const Login = () => {
               </div>
             )}
 
-            {/* Submit Button */}
             <button
               type="submit"
-              className="bg-blue-400 cursor-pointer text-white w-full py-1.5 rounded-lg font-semibold text-sm hover:bg-blue-500 disabled:bg-blue-200 transition"
               disabled={isFormInvalid}
+              className={`w-full py-1.5 rounded-lg font-semibold text-sm text-white transition 
+    ${
+      isFormInvalid
+        ? "bg-gray-300 cursor-not-allowed"
+        : "bg-gradient-to-r from-[#4ade80] via-[#14b8a6] to-[#0891b2] hover:bg-blue-500 cursor-pointer"
+    }`}
             >
               Log in
             </button>
@@ -215,10 +223,7 @@ const Login = () => {
             <div className="flex-grow border-t border-gray-300"></div>
           </div>
 
-          <Link
-           
-            className="text-xs text-blue-900 hover:underline"
-          >
+          <Link className="text-xs text-blue-900 hover:underline">
             Forgotten your password?
           </Link>
         </motion.div>
