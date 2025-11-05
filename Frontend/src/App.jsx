@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Register from "./components/UserRegister";
 import Login from "./components/UserLogin";
@@ -9,30 +9,44 @@ import HomePage from "./Pages/HomePage";
 import Explore from "./SideBarComponents/Explore";
 import FrontPage from "./SideBarComponents/FrontPage";
 import ProtectedRoute from "./ProtectedRoute";
-
-const router = createBrowserRouter([
-  { path: "/", element: <Login /> },
-  { path: "/register", element: <Register /> },
-  { path: "/dob", element: <AddDob /> },
-  { path: "/mail", element: <MailConfirm /> },
-  { path: "profile", element: <CreateProfile /> },
-
-  {
-    path: "/home",
-    element: (
-      <ProtectedRoute>
-        <HomePage />
-      </ProtectedRoute>
-    ),
-    children: [
-      { index: true, element: <FrontPage /> },
-      { path: "/home/explore", element: <Explore /> },
-    ],
-  },
-]);
+import UserProfile from "./SideBarComponents/UserProfile";
+import { UserContext } from "./UserContext"; 
 
 const App = () => {
-  return <RouterProvider router={router} />;
+ 
+   const [auth, setAuth] = useState({
+    isAuthenticated: false,
+    user: null,
+  });
+
+  
+  const router = createBrowserRouter([
+    { path: "/", element: <Login /> },
+    { path: "/register", element: <Register /> },
+    { path: "/dob", element: <AddDob /> },
+    { path: "/mail", element: <MailConfirm /> },
+    { path: "/profile", element: <CreateProfile /> },
+
+    {
+      path: "/home",
+      element: (
+        <ProtectedRoute>
+          <HomePage />
+        </ProtectedRoute>
+      ),
+      children: [
+        { index: true, element: <FrontPage /> },
+        { path: "/home/explore", element: <Explore /> },
+        { path: "/home/UserProfile", element: <UserProfile /> },
+      ],
+    },
+  ]);
+
+  return (
+    <UserContext.Provider value={{ auth, setAuth }}>
+      <RouterProvider router={router} />
+    </UserContext.Provider>
+  );
 };
 
 export default App;

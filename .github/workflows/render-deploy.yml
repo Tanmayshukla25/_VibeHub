@@ -1,0 +1,70 @@
+name: MERN App CI/CD — Deploy to Render
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  deploy-frontend:
+    name: Deploy Frontend (React)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./Frontend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+        env:
+          CI: false
+          VITE_API_URL: ${{ secrets.RENDER_BACKEND_URL }}
+
+      - name: Deploy to Render (Frontend)
+        uses: render-examples/deploy-action@v1
+        with:
+          serviceId: ${{ secrets.RENDER_SERVICE_ID_FRONTEND }}
+          apiKey: ${{ secrets.RENDER_API_KEY }}
+
+  deploy-backend:
+    name: ⚙️ Deploy Backend (Node.js/Express)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./Backend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests (optional)
+        run: |
+          if [ -f package.json ] && grep -q "test" package.json; then
+            npm test || true
+          fi
+
+      - name: Deploy to Render (Backend)
+        uses: render-examples/deploy-action@v1
+        with:
+          serviceId: ${{ secrets.RENDER_SERVICE_ID_BACKEND }}
+          apiKey: ${{ secrets.RENDER_API_KEY }}

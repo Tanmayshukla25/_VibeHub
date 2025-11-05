@@ -23,6 +23,8 @@ export const verifyToken = (req, res, next) => {
       id: decoded.id,
       email: decoded.email,
       username: decoded.username,
+      name: decoded.name,
+      bio: decoded.bio,
     };
 
     next();

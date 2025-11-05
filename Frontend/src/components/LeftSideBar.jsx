@@ -11,12 +11,11 @@ import {
   Menu,
   LogOut,
   CircleX,
-
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import instance from "../axiosConfig";
 import { useNavigate } from "react-router-dom";
-import{Link} from "react-router-dom";
+import { Link } from "react-router-dom";
 import VibeHubLogo from "../assets/VibeHub.png";
 
 const Sidebar = () => {
@@ -81,21 +80,24 @@ const Sidebar = () => {
       <div className="h-screen w-[250px] border-r border-gray-200 flex flex-col justify-between fixed bg-gradient-to-tl from-[#a2d2df] via-[#f6efbd] to-[#e4c087]">
         <div>
           <div className="w-[210px] h-[130px]">
-          <img src={VibeHubLogo} className=" w-full h-full" alt="" />
+            <img src={VibeHubLogo} className=" w-full h-full" alt="" />
           </div>
 
           <ul className="space-y-3 px-4">
-          <Link to="/home">  <li
-              onClick={() => setActive("Home")}
-              className={`flex items-center gap-4 cursor-pointer px-3 py-2 rounded-xl transition-all duration-200 ${
-                active === "Home"
-                  ? "bg-gray-100 font-semibold"
-                  : "hover:bg-gray-100"
-              }`}
-            >
-              <Home size={24} />
-              <span>Home</span>
-            </li></Link>
+            <Link to="/home">
+              {" "}
+              <li
+                onClick={() => setActive("Home")}
+                className={`flex items-center gap-4 cursor-pointer px-3 py-2 rounded-xl transition-all duration-200 ${
+                  active === "Home"
+                    ? "bg-gray-100 font-semibold"
+                    : "hover:bg-gray-100"
+                }`}
+              >
+                <Home size={24} />
+                <span>Home</span>
+              </li>
+            </Link>
 
             <li
               onClick={() => setActive("Search")}
@@ -169,18 +171,19 @@ const Sidebar = () => {
               <PlusSquare size={24} />
               <span>Create</span>
             </li>
-
-            <li
-              onClick={() => setActive("Profile")}
-              className={`flex items-center gap-4 cursor-pointer px-3 py-2 rounded-xl transition-all duration-200 ${
-                active === "Profile"
-                  ? "bg-gray-100 font-semibold"
-                  : "hover:bg-gray-100"
-              }`}
-            >
-              <User size={24} />
-              <span>Profile</span>
-            </li>
+            <Link to="/home/UserProfile">
+              <li
+                onClick={() => setActive("Profile")}
+                className={`flex items-center gap-4 cursor-pointer px-3 py-2 rounded-xl transition-all duration-200 ${
+                  active === "Profile"
+                    ? "bg-gray-100 font-semibold"
+                    : "hover:bg-gray-100"
+                }`}
+              >
+                <User size={24} />
+                <span>Profile</span>
+              </li>
+            </Link>
           </ul>
         </div>
 

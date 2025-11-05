@@ -8,6 +8,7 @@ import {
   UserLogout,
   getAllUsers,
   checkAuth,
+  updateFullProfile,
 } from "../controllers/userControllers.js";
 import {
   sendVerificationCode,
@@ -33,5 +34,6 @@ router.put(
   updateProfile
 );
 router.get("/:id", getUserById);
+router.put("/update/:id", uploadCloud.single("profilePic"), updateFullProfile);
 
 export default router;

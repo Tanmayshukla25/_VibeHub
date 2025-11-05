@@ -114,9 +114,11 @@ export const UserLogin = async (req, res) => {
         id: user._id,
         email: user.email,
         username: user.username,
+        name: user.name,
+        bio: user.bio,
       },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: "1d" }
     );
 
     res;
@@ -240,4 +242,70 @@ export const checkAuth = async (req, res) => {
     message: "User Authenticated ✅",
     user: req.user, // user info comes from verifyToken middleware
   });
+};
+
+
+export const updateFullProfile = async (req, res) => {
+  console.log("✅ Reached updateFullProfile controller");
+  try {
+    const { id } = req.params;
+    const {
+      name,
+      username,
+      email,
+      bio,
+      dob,
+      website,
+      isPrivate,
+      password,
+    } = req.body;
+
+    console.log("User ID:", id);
+    console.log("Request body:", req.body);
+    console.log("File object:", req.file);
+
+    // Create an object for only provided fields
+    const updatedData = {};
+
+    if (name) updatedData.name = name;
+    if (username) updatedData.username = username;
+    if (email) updatedData.email = email;
+    if (bio) updatedData.bio = bio;
+    if (dob) updatedData.dob = dob;
+    if (website) updatedData.website = website;
+    if (isPrivate !== undefined) updatedData.isPrivate = isPrivate;
+    if (req.file) updatedData.profilePic = req.file.path || req.file.secure_url;
+
+    // Hash password only if provided
+    if (password) {
+      const bcrypt = await import("bcrypt");
+      const salt = await bcrypt.default.genSalt(10);
+      updatedData.password = await bcrypt.default.hash(password, salt);
+    }
+
+    // If no fields were sent in the request
+    if (Object.keys(updatedData).length === 0) {
+      return res
+        .status(400)
+        .json({ message: "No fields provided to update." });
+    }
+
+    // Update and return the new user document
+    const user = await User.findByIdAndUpdate(id, updatedData, {
+      new: true,
+      runValidators: true,
+    }).select("-password -verificationCode -verificationCodeExpires");
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    res.status(200).json({
+      message: "Profile updated successfully ✅",
+      user,
+    });
+  } catch (error) {
+    console.error("❌ Error updating profile:", error);
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
+  }
 };
