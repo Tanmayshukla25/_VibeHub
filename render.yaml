@@ -6,7 +6,6 @@ services:
     name: vibehub-backend
     rootDir: Backend
     runtime: node
-    plan: free
     buildCommand: npm ci
     startCommand: npm run dev
     autoDeploy: true
@@ -20,9 +19,9 @@ services:
       - key: NPM_CONFIG_PRODUCTION
         value: "false"
       - key: MONGO_URI
-        sync: false         # You’ll add this manually in Render Dashboard
+        sync: false        # set this manually in Render Dashboard
       - key: JWT_SECRET
-        sync: false         # Add manually for security
+        sync: false        # set this manually for security
       - key: FRONTEND_URL
         fromService:
           type: web
@@ -38,7 +37,6 @@ services:
     runtime: static
     buildCommand: npm ci && npm run build
     staticPublishPath: dist
-    plan: free
     autoDeploy: true
     envVars:
       - key: NODE_ENV
