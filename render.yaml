@@ -1,49 +1,52 @@
-# render.yaml
 services:
-  # Backend Service Configuration
+  # Backend API Service
   - type: web
     name: vibehub-backend
     env: node
-    region: singapore  # Choose the region closest to your users
+    plan: free
+    region: singapore
     rootDir: Backend
     buildCommand: npm install
-    startCommand: node index.js  # Use the production start command instead of dev
-    plan: free
-    healthCheckPath: /
+    startCommand: node index.js
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 8080
-      - key: JWT_SECRET  # You'll need to set this in Render dashboard
+      - key: MONGO_URI
         sync: false
-      - key: MONGO_URI   # You'll need to set this in Render dashboard
+      - key: JWT_SECRET
         sync: false
-      - key: CLOUDINARY_CLOUD_NAME # If you're using Cloudinary
+      - key: CLOUDINARY_CLOUD_NAME
         sync: false
       - key: CLOUDINARY_API_KEY
         sync: false
       - key: CLOUDINARY_API_SECRET
         sync: false
-      - key: FRONTEND_URL
+      - key: FRONTEND_HOST
         fromService:
           name: vibehub-frontend
           type: web
           property: host
 
-  # Frontend Service Configuration
+  # Frontend Static Site
   - type: web
     name: vibehub-frontend
     env: static
+    plan: free
     rootDir: Frontend
     buildCommand: npm install && npm run build
-    staticPublishPath: ./dist
-    plan: free
+    staticPublishPath: dist
     envVars:
-      - key: NODE_ENV
-        value: production
-      - key: VITE_BASE_URL  # This will be used in your axios config
+      - key: VITE_API_URL
         fromService:
           name: vibehub-backend
           type: web
           property: host
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: X-XSS-Protection
+        value: 1; mode=block
