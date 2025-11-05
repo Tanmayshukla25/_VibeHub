@@ -8,7 +8,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 const allowedOrigins = [
-  "https://vibehub-1-65d1.onrender.com", 
+  "https://vibehub-1-c4lj.onrender.com", 
   "http://localhost:5173",
 ];
 
