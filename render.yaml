@@ -1,70 +1,57 @@
-name: MERN App CI/CD — Deploy to Render
+services:
+  # ==========================
+  # ⚙️ Backend (Node + Express + MongoDB)
+  # ==========================
+  - type: web
+    name: vibehub-backend
+    rootDir: Backend
+    runtime: node
+    plan: free
+    buildCommand: npm ci
+    startCommand: npm run dev
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4040
+      - key: NPM_CONFIG_PRODUCTION
+        value: "false"
+      - key: MONGO_URI
+        sync: false         # You’ll add this manually in Render Dashboard
+      - key: JWT_SECRET
+        sync: false         # Add manually for security
+      - key: FRONTEND_URL
+        fromService:
+          type: web
+          name: vibehub-frontend
+          property: host
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
-jobs:
-  deploy-frontend:
-    name: Deploy Frontend (React)
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./Frontend
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18.x
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build frontend
-        run: npm run build
-        env:
-          CI: false
-          VITE_API_URL: ${{ secrets.RENDER_BACKEND_URL }}
-
-      - name: Deploy to Render (Frontend)
-        uses: render-examples/deploy-action@v1
-        with:
-          serviceId: ${{ secrets.RENDER_SERVICE_ID_FRONTEND }}
-          apiKey: ${{ secrets.RENDER_API_KEY }}
-
-  deploy-backend:
-    name: ⚙️ Deploy Backend (Node.js/Express)
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./Backend
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18.x
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run tests (optional)
-        run: |
-          if [ -f package.json ] && grep -q "test" package.json; then
-            npm test || true
-          fi
-
-      - name: Deploy to Render (Backend)
-        uses: render-examples/deploy-action@v1
-        with:
-          serviceId: ${{ secrets.RENDER_SERVICE_ID_BACKEND }}
-          apiKey: ${{ secrets.RENDER_API_KEY }}
+  # ==========================
+  # 💎 Frontend (React + Vite)
+  # ==========================
+  - type: web
+    name: vibehub-frontend
+    rootDir: Frontend
+    runtime: static
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    plan: free
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: VITE_BACKEND_URL
+        fromService:
+          type: web
+          name: vibehub-backend
+          property: host
+    routes:
+      - type: rewrite
+        source: /admin/login
+        destination: /index.html
+      - type: rewrite
+        source: /*
+        destination: /index.html
