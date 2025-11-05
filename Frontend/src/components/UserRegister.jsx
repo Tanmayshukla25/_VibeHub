@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion"; // 
 import instance from "../axiosConfig.js";
 import { toast } from "react-toastify";
 import { useNavigate, Link } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import RegisterImg from "../assets/Login.png";
+
 
 const AnimatedText = ({ text, speed, className, style }) => {
   const [displayText, setDisplayText] = useState("");
@@ -26,6 +28,42 @@ const AnimatedText = ({ text, speed, className, style }) => {
   );
 };
 
+
+const Loader = () => (
+  <motion.div
+    className="flex justify-center items-center space-x-2"
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    transition={{ duration: 0.3 }}
+  >
+    <motion.div
+      className="w-4 h-4 bg-white rounded-full"
+      animate={{ y: [0, -6, 0] }}
+      transition={{ duration: 0.6, repeat: Infinity, ease: "easeInOut" }}
+    />
+    <motion.div
+      className="w-4 h-4 bg-white rounded-full"
+      animate={{ y: [0, -6, 0] }}
+      transition={{
+        duration: 0.6,
+        delay: 0.2,
+        repeat: Infinity,
+        ease: "easeInOut",
+      }}
+    />
+    <motion.div
+      className="w-4 h-4 bg-white rounded-full"
+      animate={{ y: [0, -6, 0] }}
+      transition={{
+        duration: 0.6,
+        delay: 0.4,
+        repeat: Infinity,
+        ease: "easeInOut",
+      }}
+    />
+  </motion.div>
+);
+
 const Register = () => {
   const [formData, setFormData] = useState({
     name: "",
@@ -35,6 +73,9 @@ const Register = () => {
     confirmPassword: "",
   });
 
+ 
+  const [loading, setLoading] = useState(false); 
+  
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -70,6 +111,12 @@ const Register = () => {
       setPasswordError(
         value.length < 8 ? "Password must be at least 8 characters" : ""
       );
+     
+      if (formData.confirmPassword) {
+        setConfirmError(
+            formData.confirmPassword !== value ? "Passwords do not match" : ""
+        );
+      }
     }
 
     if (name === "confirmPassword") {
@@ -104,6 +151,9 @@ const Register = () => {
       return;
     }
 
+  
+    setLoading(true);
+
     try {
       const res = await instance.post("/user/register", {
         name: formData.name,
@@ -113,16 +163,29 @@ const Register = () => {
       });
 
       localStorage.setItem("userEmail", formData.email);
-      navigate("/add-dob");
       toast.success("Registration successful!");
-      console.log(res.data);
-      navigate("/Dob", { state: { userId: res.data.user.id } });
+      
+      const userId = res.data?.user?.id || res.data?.id; 
+      if (userId) {
+          
+          setTimeout(() => {
+              navigate("/Dob", { state: { userId: userId } });
+          }, 500);
+      } else {
+          setTimeout(() => {
+              navigate("/add-dob");
+          }, 500);
+      }
     } catch (error) {
       console.error(error);
       toast.error(error.response?.data?.message || "Registration failed");
+    } finally {
+      
+      setLoading(false); 
     }
   };
 
+  
   const isFormInvalid =
     !formData.name ||
     !formData.username ||
@@ -131,7 +194,8 @@ const Register = () => {
     !formData.confirmPassword ||
     emailError ||
     passwordError ||
-    confirmError;
+    confirmError ||
+    loading; 
 
   return (
     <>
@@ -145,12 +209,17 @@ const Register = () => {
         }
       `}</style>
 
-      <div className="flex justify-between items-center h-screen w-screen bg-gradient-to-tl from-[#a2d2df] via-[#f6efbd] to-[#e4c087] px-20 relative overflow-hidden">
+
+      <div 
+        className="flex flex-col lg:flex-row justify-center lg:justify-between items-center min-h-screen w-screen bg-gradient-to-tl from-[#a2d2df] via-[#f6efbd] to-[#e4c087]  relative overflow-y-auto"
+      >
+        
+      
         <div className="hidden lg:flex relative items-center justify-center h-full">
           <AnimatedText
             text="JoinVibe"
             speed={150}
-            className="text-[70px] text-gray-800 billabong-font absolute left-0"
+            className="hidden xl:block text-[70px] text-gray-800 billabong-font absolute left-0"
             style={{
               transform: "rotate(270deg)",
               fontFamily: "Billabong, cursive",
@@ -160,12 +229,15 @@ const Register = () => {
           <img
             src={RegisterImg}
             alt="VibeHub Registration Illustration"
-            className="w-[600px] h-[600px] object-contain ml-30 filter drop-shadow-[10px_10px_10px_#000]"
+            className="w-[450px] h-[450px] xl:w-[600px] xl:h-[600px] object-contain ml-30 filter drop-shadow-[10px_10px_10px_#000]"
           />
         </div>
 
-        <div className="flex flex-col justify-center items-center w-full max-w-sm ml-auto mr-24 scale-up-center shadow shadow-gray-700 rounded-2xl">
-          <div className="rounded-t-2xl bg-gradient-to-bl from-[#ffe4e6] to-[#ccfbf1] p-10 pt-5 pb-5 w-full flex flex-col items-center shadow-xl">
+        
+        <div 
+          className="flex flex-col justify-center items-center w-full max-w-xs sm:max-w-sm mx-auto lg:ml-auto lg:mr-24 scale-up-center shadow shadow-gray-700 rounded-2xl my-8 lg:my-0"
+        >
+          <div className="rounded-t-2xl bg-gradient-to-bl from-[#ffe4e6] to-[#ccfbf1] p-8 pt-4 pb-4 w-full flex flex-col items-center shadow-xl">
             <h1
               className="text-4xl my-4 text-gray-800"
               style={{ fontFamily: "Billabong, cursive" }}
@@ -173,11 +245,12 @@ const Register = () => {
               VibeHub
             </h1>
 
-            <p className="text-gray-500 text-center mb-4 font-semibold">
+            <p className="text-gray-500 text-center mb-4 font-semibold text-sm">
               Sign up to see photos and videos from your friends.
             </p>
 
             <form onSubmit={handleSubmit} className="w-full">
+            
               <input
                 type="text"
                 name="name"
@@ -286,17 +359,25 @@ const Register = () => {
                   </p>
                 )}
 
+            
               <button
                 type="submit"
-                className=" cursor-pointer bg-gradient-to-r from-[#4ade80] via-[#14b8a6] to-[#0891b2] text-white w-full py-1.5 mt-3 rounded-lg font-semibold text-sm hover:bg-green-500 disabled:bg-green-200 transition"
-                disabled={isFormInvalid}
+               
+                disabled={isFormInvalid} 
+                className={`w-full py-1.5 mt-3 rounded-lg font-semibold text-sm text-white transition flex justify-center items-center ${
+                  isFormInvalid 
+                    ? "bg-gray-300 cursor-not-allowed"
+                    : "bg-gradient-to-r from-[#4ade80] via-[#14b8a6] to-[#0891b2] hover:bg-blue-500 cursor-pointer"
+                }`}
               >
-                Sign up
+               
+                {loading ? <Loader /> : "Sign up"}
               </button>
             </form>
           </div>
 
-          <div className="rounded-b-2xl  bg-gradient-to-bl from-[#ffe4e6] to-[#ccfbf1] p-5 w-full mt-2 text-center text-sm shadow-xl">
+        
+          <div className="rounded-b-2xl bg-gradient-to-bl from-[#ffe4e6] to-[#ccfbf1] p-5 w-full mt-2 text-center text-sm shadow-xl">
             <p>
               Have an account?{" "}
               <Link
@@ -309,6 +390,7 @@ const Register = () => {
           </div>
         </div>
 
+      
         <div className="absolute bottom-4 w-full text-center text-xs text-gray-700">
           <p>From Meta</p>
         </div>

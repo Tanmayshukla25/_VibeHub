@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { Camera, Plus, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import instance from "../axiosConfig";
-import defaultPic from "../assets/defaultpic.png";
+import defaultPic from "../assets/Defalutpic.png";
 import { UserContext } from "../UserContext";
 
 const UserProfile = () => {
@@ -27,7 +27,7 @@ const UserProfile = () => {
     isPrivate: false,
   });
 
-  // ✅ Fetch user details
+  
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
@@ -163,103 +163,150 @@ const UserProfile = () => {
   return (
     <>
       {/* ✅ Edit Modal */}
-      <AnimatePresence>
-        {showEditModal && (
-          <>
-            <motion.div
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowEditModal(false)}
-            />
-            <motion.div
-              className="fixed inset-0 flex justify-center items-center z-50"
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-            >
-              <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md relative">
-                <button
-                  className="absolute top-3 right-3 text-gray-600 hover:text-black"
-                  onClick={() => setShowEditModal(false)}
-                >
-                  <X size={22} />
-                </button>
-                <h2 className="text-xl font-semibold mb-4 text-center text-gray-800">
-                  Edit Profile
-                </h2>
+  
 
-                <form onSubmit={handleUpdateProfile}>
-                  {[
-                    { label: "Name", name: "name" },
-                    { label: "Username", name: "username" },
-                    { label: "Email", name: "email" },
-                    { label: "Bio", name: "bio" },
-                    { label: "Website", name: "website" },
-                  ].map((field) => (
-                    <div className="mb-3" key={field.name}>
-                      <label className="block text-sm text-gray-700 font-medium mb-1">
-                        {field.label}
-                      </label>
-                      <input
-                        type="text"
-                        name={field.name}
-                        value={editData[field.name]}
-                        onChange={handleEditChange}
-                        className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none"
-                      />
-                    </div>
-                  ))}
+<AnimatePresence>
+  {showEditModal && (
+    <>
+     
+      <motion.div
+        className="fixed inset-0 bg-black/70 backdrop-blur-md z-40"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={() => setShowEditModal(false)}
+      />
 
-                  <div className="mb-3">
-                    <label className="block text-sm text-gray-700 font-medium mb-1">
-                      Date of Birth
-                    </label>
-                    <input
-                      type="date"
-                      name="dob"
-                      value={editData.dob}
-                      onChange={handleEditChange}
-                      className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none"
-                    />
-                  </div>
+     
+      <motion.div
+        className="fixed inset-0 flex justify-center items-center z-50 p-4" 
+        initial={{ scale: 0.9, y: 50, opacity: 0 }} 
+        animate={{ scale: 1, y: 0, opacity: 1 }}
+        exit={{ scale: 0.9, y: 50, opacity: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <div 
+          className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-lg relative 
+          bg-gradient-to-br from-white to-teal-50/50" 
+        >
+        
+          <button
+            className="absolute top-4 right-4 text-gray-500 hover:text-red-500 transition duration-150"
+            onClick={() => setShowEditModal(false)}
+            aria-label="Close modal"
+          >
+            
+            <X size={24} /> 
+          </button>
 
-                  <div className="flex items-center mb-4">
-                    <input
-                      type="checkbox"
-                      id="isPrivate"
-                      name="isPrivate"
-                      checked={editData.isPrivate}
-                      onChange={handleEditChange}
-                      className="mr-2"
-                    />
-                    <label htmlFor="isPrivate" className="text-gray-700">
-                      Private Account
-                    </label>
-                  </div>
+          <h2 className="text-2xl font-bold mb-6 text-center text-gray-800 border-b pb-2">
+            ✨ Edit Profile
+          </h2>
 
-                  <button
-                    type="submit"
-                    disabled={uploading}
-                    className={`w-full py-2 rounded-lg text-white font-semibold transition-all ${
-                      uploading
-                        ? "bg-gray-400 cursor-not-allowed"
-                        : "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
-                    }`}
-                  >
-                    {uploading ? "Updating..." : "Save Changes"}
-                  </button>
-                </form>
+          <form onSubmit={handleUpdateProfile} className="space-y-4">
+            
+           
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[
+                { label: "Full Name", name: "name" },
+                { label: "Username", name: "username" },
+                { label: "Email", name: "email", type: "email" },
+                { label: "Website URL", name: "website", type: "text" },
+              ].map((field) => (
+                <div key={field.name}>
+                  <label className="block text-sm text-gray-700 font-medium mb-1">
+                    {field.label}
+                  </label>
+                  <input
+                    type={field.type || "text"}
+                    name={field.name}
+                    value={editData[field.name]}
+                    onChange={handleEditChange}
+                    
+                    className="w-full border border-gray-300 rounded-lg p-2.5 text-gray-700 
+                                 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition duration-200"
+                    required={field.name === 'name' || field.name === 'username' || field.name === 'email'}
+                  />
+                </div>
+              ))}
+            </div>
+
+            
+            <div>
+              <label className="block text-sm text-gray-700 font-medium mb-1">
+                Bio
+              </label>
+              <textarea
+                name="bio"
+                value={editData.bio}
+                onChange={handleEditChange}
+                rows="3"
+                className="w-full border border-gray-300 rounded-lg p-2.5 text-gray-700 
+                           focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition duration-200 resize-none"
+                placeholder="Tell us about yourself..."
+              />
+            </div>
+
+          
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t mt-4 border-gray-100">
+              
+              
+              <div>
+                <label className="block text-sm text-gray-700 font-medium mb-1">
+                  Date of Birth
+                </label>
+                <input
+                  type="date"
+                  name="dob"
+                  value={editData.dob}
+                  onChange={handleEditChange}
+                  className="w-full border border-gray-300 rounded-lg p-2.5 text-gray-700 
+                             focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition duration-200"
+                />
               </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
 
-      {/* ✅ Profile Page */}
-      <div className="flex justify-center items-center min-h-screen p-4">
-        <div className="w-full max-w-md p-8 text-center ">
+            
+              <div className="flex items-end h-full">
+                <div className="flex items-center p-2.5 border border-gray-300 rounded-lg w-full bg-gray-50/50">
+                  <input
+                    type="checkbox"
+                    id="isPrivate"
+                    name="isPrivate"
+                    checked={editData.isPrivate}
+                    onChange={handleEditChange}
+                   
+                    className="h-5 w-5 text-teal-600 border-gray-300 rounded focus:ring-teal-500 mr-3" 
+                  />
+                  <label htmlFor="isPrivate" className="text-gray-700 font-medium text-sm">
+                    Make Account Private
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            
+            <button
+              type="submit"
+              disabled={uploading}
+              className={`w-full py-3 mt-6 rounded-xl text-white font-bold text-lg transition-all transform hover:scale-[1.01] duration-300 shadow-lg ${
+                uploading
+                  ? "bg-gray-400 cursor-not-allowed shadow-gray-300"
+                  : "bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 shadow-teal-400/50"
+              }`}
+            >
+              {uploading ? "💾 Updating Profile..." : "Save Changes"}
+            </button>
+            
+          </form>
+        </div>
+      </motion.div>
+    </>
+  )}
+</AnimatePresence>
+
+   
+      <div className="flex justify-center items-center  p-4">
+        <div className="w-full max-w-md  text-center ">
           <div className="flex items-center justify-between mb-8">
             <div className="relative group">
               {auth?._id === user?.id ? (
@@ -302,14 +349,14 @@ const UserProfile = () => {
                   </div>
                 </div>
               )}
-              <p className="text-sm text-gray-600 mt-3 ">{user?.username}</p>
+              <p className="text-sm text-gray-600 mt-3 mr-15">{user?.username}</p>
               <p className="text-xs text-gray-500 mt-1 "><span className="font-bold text-black"> Bio:-</span> {user?.bio}</p>
             </div>
 
             <div className="text-left ml-4 flex-1">
               <h2 className="text-xl font-semibold text-black">{user?.name}</h2>
 
-              {/* ✅ Posts, Followers, Following */}
+             
               <div className="flex space-x-6 mt-3">
                 {[
                   { label: "Posts", count: user?.posts?.length || 0 },

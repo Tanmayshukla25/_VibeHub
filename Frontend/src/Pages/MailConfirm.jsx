@@ -7,7 +7,7 @@ import { CheckCheck } from "../components/CheckCheck";
 
 const MailConfirm = () => {
   const [userEmail, setUserEmail] = useState("");
-  const [otpValues, setOtpValues] = useState(["", "", "", "","",""]);
+  const [otpValues, setOtpValues] = useState(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
 
@@ -28,9 +28,8 @@ const MailConfirm = () => {
     }
   }, [userId, navigate]);
 
-
   const handleOtpChange = (e, index) => {
-    const value = e.target.value.replace(/[^0-9]/g, ""); 
+    const value = e.target.value.replace(/[^0-9]/g, "");
     const newOtp = [...otpValues];
     newOtp[index] = value;
     setOtpValues(newOtp);
@@ -140,12 +139,13 @@ const MailConfirm = () => {
             </button>
           </p>
 
-        
           <div className="flex justify-center gap-3 mt-4">
             {otpValues.map((val, index) => (
               <input
                 key={index}
-                type="text"
+                type="tel"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 maxLength="1"
                 value={val}
                 onChange={(e) => handleOtpChange(e, index)}

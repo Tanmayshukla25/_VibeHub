@@ -114,7 +114,7 @@ const Sidebar = () => {
             <Link to="/home/explore">
               <li
                 onClick={() => setActive("Explore")}
-                className={`flex items-center gap-4 cursor-pointer px-3 py-2 mb-2 rounded-xl transition-all duration-200 ${
+                className={`flex items-center gap-4 cursor-pointer px-3 py-2 mb-2 mt-2 rounded-xl transition-all duration-200 ${
                   active === "Explore"
                     ? "bg-gray-100 font-semibold"
                     : "hover:bg-gray-100"

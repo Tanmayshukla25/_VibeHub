@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import instance from "../axiosConfig.js";
-import { toast } from "react-toastify";
 import { useNavigate, Link } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import LoginImg from "../assets/Login.png";
+
 
 const AnimatedText = ({ text, speed, className, style }) => {
   const [displayText, setDisplayText] = useState("");
@@ -16,7 +16,6 @@ const AnimatedText = ({ text, speed, className, style }) => {
         setDisplayText((prev) => prev + text[index]);
         setIndex((prev) => prev + 1);
       }, speed);
-
       return () => clearTimeout(timeoutId);
     }
   }, [index, text, speed]);
@@ -28,29 +27,69 @@ const AnimatedText = ({ text, speed, className, style }) => {
   );
 };
 
+
+const Loader = () => (
+  <motion.div
+    className="flex justify-center items-center space-x-2"
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    transition={{ duration: 0.3 }}
+  >
+    <motion.div
+      className="w-4 h-4 bg-white rounded-full"
+      animate={{ y: [0, -6, 0] }}
+      transition={{ duration: 0.6, repeat: Infinity, ease: "easeInOut" }}
+    />
+    <motion.div
+      className="w-4 h-4 bg-white rounded-full"
+      animate={{ y: [0, -6, 0] }}
+      transition={{
+        duration: 0.6,
+        delay: 0.2,
+        repeat: Infinity,
+        ease: "easeInOut",
+      }}
+    />
+    <motion.div
+      className="w-4 h-4 bg-white rounded-full"
+      animate={{ y: [0, -6, 0] }}
+      transition={{
+        duration: 0.6,
+        delay: 0.4,
+        repeat: Infinity,
+        ease: "easeInOut",
+      }}
+    />
+  </motion.div>
+);
+
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [passwordError, setPasswordError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState({ text: "", type: "" });
   const navigate = useNavigate();
 
-  // 🧠 Handle input change + validation
+  
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    setMessage({ text: "", type: "" });
 
+  
     if (name === "email") {
       if (value && !/^[\w.+-]+@gmail\.com$/.test(value)) {
-        setEmailError(
-          "Please enter a valid Gmail address (e.g., user@gmail.com)"
-        );
+        setEmailError("Please enter a valid Gmail address (e.g., user@gmail.com)");
       } else {
         setEmailError("");
       }
     }
 
+  
     if (name === "password") {
       let strength = 0;
       if (value.length >= 8) strength++;
@@ -77,36 +116,62 @@ const Login = () => {
     return "Strong";
   };
 
-  // 🚀 Submit handler
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!formData.email || !formData.password) {
+      setMessage({ text: "Email and password are required", type: "error" });
+      return;
+    }
+
     if (emailError || passwordError) {
-      toast.error("Please fix validation errors before logging in.");
+      setMessage({
+        text: "Please fix validation errors before logging in.",
+        type: "error",
+      });
       return;
     }
 
     try {
+      setLoading(true);
       const res = await instance.post("/user/login", formData);
-      toast.success("Login successful!");
       localStorage.setItem("token", res.data.token);
-      navigate("/Home");
+      setMessage({ text: "Login successful!", type: "success" });
+
+      setTimeout(() => navigate("/Home"), 800);
     } catch (error) {
-      toast.error(error.response?.data?.message || "Login failed");
+      const messageText =
+        error.response?.data?.message ||
+        (error.response?.status === 404
+          ? "User not found. Please register first."
+          : error.response?.status === 401
+          ? "Invalid credentials. Please check your password."
+          : "Login failed. Try again later.");
+
+      setMessage({ text: messageText, type: "error" });
+    } finally {
+      setLoading(false);
     }
   };
 
   const isFormInvalid =
     !formData.email || !formData.password || emailError || passwordError;
 
+
+
+
   return (
-    <div className="flex justify-between items-center h-screen w-screen bg-gradient-to-tl from-[#a2d2df] via-[#f6efbd] to-[#e4c087] px-20 relative overflow-hidden">
-      {/* Left Illustration Section */}
+    <div 
+     
+      className="flex flex-col lg:flex-row justify-center lg:justify-between items-center h-screen w-screen bg-gradient-to-tl from-[#a2d2df] via-[#f6efbd] to-[#e4c087] relative overflow-y-auto"
+    >
+      
       <div className="hidden lg:flex relative items-center justify-center h-full">
         <AnimatedText
           text="VibeHub"
           speed={150}
-          className="text-[70px] text-gray-800 billabong-font absolute left-0"
+      
+          className="hidden xl:block text-[70px] text-gray-800 billabong-font absolute left-0"
           style={{
             transform: "rotate(270deg)",
             fontFamily: "Billabong, cursive",
@@ -116,22 +181,23 @@ const Login = () => {
         <img
           src={LoginImg}
           alt="VibeHub Login Illustration"
-          className="w-[600px] h-[600px] object-contain ml-30 filter drop-shadow-[10px_10px_10px_#000]"
+          className="w-[450px] h-[450px] xl:w-[600px] xl:h-[600px] object-contain ml-30 filter drop-shadow-[10px_10px_10px_#000]"
         />
       </div>
 
-      {/* Login Form Section */}
+      
       <motion.div
         initial={{ opacity: 0, scale: 0.8, y: 50 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className="flex flex-col shadow shadow-gray-700 rounded-2xl justify-center items-center w-full max-w-sm ml-auto mr-24"
+      
+        className="flex flex-col shadow shadow-gray-700 rounded-2xl justify-center items-center w-full max-w-xs sm:max-w-sm mx-auto lg:ml-auto lg:mr-24"
       >
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.6 }}
-          className="rounded-t-2xl bg-gradient-to-bl from-[#ffe4e6] to-[#ccfbf1] p-10 pt-5 pb-5 w-full flex flex-col items-center shadow-xl"
+          className="rounded-t-2xl bg-gradient-to-bl from-[#ffe4e6] to-[#ccfbf1] p-8 pt-4 pb-4 w-full flex flex-col items-center shadow-xl"
         >
           <h1
             className="text-4xl my-4 text-gray-800"
@@ -141,7 +207,7 @@ const Login = () => {
           </h1>
 
           <form onSubmit={handleSubmit} className="w-full">
-            {/* Email Field */}
+         
             <input
               type="text"
               name="email"
@@ -151,11 +217,9 @@ const Login = () => {
               className="w-full border border-gray-300 bg-gray-50 p-2 text-sm mb-1 rounded focus:ring-0 focus:border-gray-400"
               required
             />
-            {emailError && (
-              <p className="text-red-500 text-xs mb-2">{emailError}</p>
-            )}
+            {emailError && <p className="text-red-500 text-xs mb-2">{emailError}</p>}
 
-            {/* Password Field */}
+          
             <div className="relative mb-2">
               <input
                 type={showPassword ? "text" : "password"}
@@ -174,10 +238,9 @@ const Login = () => {
               </span>
             </div>
 
-            {/* Password Validation Feedback */}
-            {passwordError && (
-              <p className="text-red-500 text-xs mt-1">{passwordError}</p>
-            )}
+            {passwordError && <p className="text-red-500 text-xs mt-1">{passwordError}</p>}
+
+        
             {formData.password && (
               <div className="w-full mt-1 mb-2">
                 <div className="flex justify-between text-xs text-gray-600">
@@ -203,20 +266,32 @@ const Login = () => {
               </div>
             )}
 
+        
+            {message.text && (
+              <p
+                className={`text-sm text-center font-medium mb-2 ${
+                  message.type === "error" ? "text-red-500" : "text-green-600"
+                }`}
+              >
+                {message.text}
+              </p>
+            )}
+
+           
             <button
               type="submit"
-              disabled={isFormInvalid}
-              className={`w-full py-1.5 rounded-lg font-semibold text-sm text-white transition 
-    ${
-      isFormInvalid
-        ? "bg-gray-300 cursor-not-allowed"
-        : "bg-gradient-to-r from-[#4ade80] via-[#14b8a6] to-[#0891b2] hover:bg-blue-500 cursor-pointer"
-    }`}
+              disabled={isFormInvalid || loading}
+              className={`w-full py-1.5 rounded-lg font-semibold text-sm text-white transition flex justify-center items-center ${
+                isFormInvalid || loading
+                  ? "bg-gray-300 cursor-not-allowed"
+                  : "bg-gradient-to-r from-[#4ade80] via-[#14b8a6] to-[#0891b2] hover:bg-blue-500 cursor-pointer"
+              }`}
             >
-              Log in
+              {loading ? <Loader /> : "Log in"}
             </button>
           </form>
 
+      
           <div className="flex items-center w-full my-4">
             <div className="flex-grow border-t border-gray-300"></div>
             <span className="mx-4 text-gray-500 text-sm font-semibold">OR</span>
@@ -228,7 +303,7 @@ const Login = () => {
           </Link>
         </motion.div>
 
-        {/* Footer Section */}
+     
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -247,7 +322,6 @@ const Login = () => {
         </motion.div>
       </motion.div>
 
-      {/* Footer Branding */}
       <div className="absolute bottom-4 w-full text-center text-xs text-gray-700">
         <p>From Meta</p>
       </div>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import instance from "../axiosConfig.js";
 
 const SearchBar = () => {
@@ -6,6 +6,22 @@ const SearchBar = () => {
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Debounce timer to delay API calls until user stops typing
+  useEffect(() => {
+    if (searchTerm.trim().length < 1) {
+      setFilteredUsers([]);
+      return;
+    }
+
+    if (searchTerm.trim().length >= 3) {
+      const timer = setTimeout(() => {
+        handleSearch();
+      }, 400);
+
+      return () => clearTimeout(timer);
+    }
+  }, [searchTerm]);
 
   const handleSearch = async () => {
     try {
@@ -19,9 +35,9 @@ const SearchBar = () => {
 
       const filtered = allUsers.filter((user) =>
         user.username
-          .replace(/\s+/g, "")
+          ?.replace(/\s+/g, "")
           .toLowerCase()
-          .includes(normalizedSearch)
+          .startsWith(normalizedSearch)
       );
 
       setFilteredUsers(filtered);
@@ -35,37 +51,27 @@ const SearchBar = () => {
 
   return (
     <div className="flex flex-col items-center mt-8 w-full px-4">
-      <div className="flex items-center gap-3 w-full max-w-2xl mb-6">
-        <div className="relative flex-1">
-          <input
-            type="text"
-            placeholder="Search by username..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-            className="w-full px-5 py-3 pr-12 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 shadow-sm"
-          />
-          <svg
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
-        </div>
-        <button
-          onClick={handleSearch}
-          disabled={loading}
-          className="bg-gradient-to-r from-[#2dd4bf]  to-[#1f2937] text-white px-6 py-3 rounded-xl  active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+      <div className="relative w-full max-w-2xl mb-6">
+        <input
+          type="text"
+          placeholder="Search by username..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full px-5 py-3 pr-12 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 shadow-sm"
+        />
+        <svg
+          className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
         >
-          {loading ? "Searching..." : "Search"}
-        </button>
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          />
+        </svg>
       </div>
 
       {loading && (
@@ -74,6 +80,7 @@ const SearchBar = () => {
           <p>Loading users...</p>
         </div>
       )}
+
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2">
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -127,7 +134,7 @@ const SearchBar = () => {
               </div>
             ))
           : !loading &&
-            searchTerm && (
+            searchTerm.trim().length >= 3 && (
               <div className="text-center py-12">
                 <svg
                   className="w-16 h-16 text-gray-300 mx-auto mb-4"
