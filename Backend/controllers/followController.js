@@ -1,5 +1,6 @@
 import FollowRequest from "../models/FollowRequest.js";
-import UserAuth from "../models/UserAuth.js";
+import UserAuth from "../models/userSchema.js";
+
 
 // ✅ Send Follow Request
 export const sendFollowRequest = async (req, res) => {

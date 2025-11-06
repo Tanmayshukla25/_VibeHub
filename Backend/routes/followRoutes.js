@@ -5,7 +5,8 @@ import {
   rejectFollowRequest,
   getFollowRequests,
 } from "../controllers/followController.js";
-import { verifyToken } from "../middleware/authMiddleware.js"; 
+import { verifyToken } from "../middleware/CheckToken.js";
+
 
 const router = express.Router();
 

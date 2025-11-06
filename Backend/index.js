@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import userRouter from "./routes/userRoutes.js";
+import followRouter from "./routes/followRoutes.js";
 import "dotenv/config";
 import connectToDB from "./config/db.js";
 import cookieParser from "cookie-parser";
@@ -34,6 +35,7 @@ app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use("/user", userRouter);
+app.use("/follow", followRouter);
 
 
 await connectToDB();
