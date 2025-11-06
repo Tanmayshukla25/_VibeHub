@@ -1,4 +1,3 @@
-// MailConfirm.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -12,7 +11,6 @@ const MailConfirm = () => {
   const [otpValues, setOtpValues] = useState(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
-
   const location = useLocation();
   const navigate = useNavigate();
   const userId = location.state?.userId;
@@ -23,218 +21,89 @@ const MailConfirm = () => {
     if (storedEmail) setUserEmail(storedEmail);
   }, []);
 
-  useEffect(() => {
-    if (!userId) {
-      console.warn("No userId found. Redirecting...");
-      navigate("/register");
-    }
-  }, [userId, navigate]);
-
-  const handleOtpChange = (e, index) => {
-    const value = e.target.value.replace(/[^0-9]/g, "");
+  const handleOtpChange = (e, i) => {
+    const v = e.target.value.replace(/[^0-9]/g, "");
     const newOtp = [...otpValues];
-    newOtp[index] = value;
+    newOtp[i] = v;
     setOtpValues(newOtp);
-
-    if (value && index < newOtp.length - 1) {
-      inputRefs.current[index + 1].focus();
-    }
+    if (v && i < newOtp.length - 1) inputRefs.current[i + 1].focus();
   };
 
-  const handleOtpKeyDown = (e, index) => {
-    if (e.code === "Backspace" && !otpValues[index] && index > 0) {
-      inputRefs.current[index - 1].focus();
-    }
+  const handleOtpKeyDown = (e, i) => {
+    if (e.code === "Backspace" && !otpValues[i] && i > 0) inputRefs.current[i - 1].focus();
   };
 
   const handleNext = async () => {
-    setMessage({ text: "", type: "" });
-
-    const confirmationCode = otpValues.join("").trim();
-
+    const confirmationCode = otpValues.join("");
     if (confirmationCode.length < 6) {
-      setMessage({
-        text: "Please enter the 4-digit confirmation code.",
-        type: "error",
-      });
+      setMessage({ text: "Enter the 6-digit code.", type: "error" });
       return;
     }
 
-    setLoading(true);
     try {
-      const res = await instance.post("/user/verify-code", {
-        email: userEmail,
-        code: confirmationCode,
-      });
-
-      setMessage({
-        text: res.data.message || "Code verified successfully!",
-        type: "success",
-      });
-      setTimeout(() => {
-        navigate("/profile", { state: { userId } });
-      }, 1500);
-    } catch (error) {
-      setMessage({
-        text: error.response?.data?.message || "Invalid verification code.",
-        type: "error",
-      });
+      setLoading(true);
+      const res = await instance.post("/user/verify-code", { email: userEmail, code: confirmationCode });
+      setMessage({ text: "✅ Verified successfully!", type: "success" });
+      setTimeout(() => navigate("/profile", { state: { userId } }), 1200);
+    } catch {
+      setMessage({ text: "Invalid verification code.", type: "error" });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleResend = async () => {
-    setMessage({ text: "", type: "" });
-
-    if (!userEmail) {
-      setMessage({ text: "User email not found.", type: "error" });
-      return;
-    }
-
-    try {
-      await instance.post("/user/send-code", { email: userEmail });
-      setMessage({
-        text: "A new verification code has been sent to your email.",
-        type: "success",
-      });
-    } catch (error) {
-      console.log(error);
-      setMessage({
-        text: "Failed to resend code. Try again later.",
-        type: "error",
-      });
-    }
-  };
-
-  const handleGoBack = () => navigate(-1);
-  const handleLogin = () => navigate("/login");
-
   return (
-    <div className="min-h-screen bg-gradient-to-tl from-[#a2d2df] via-[#f6efbd] to-[#e4c087] flex flex-col items-center justify-center p-4 sm:p-6 font-sans">
-      {/* Logo */}
-      <div className="mb-4 flex flex-col items-center">
-        <Link to="/" className="flex items-center">
-          <img src={VibeHubLogo} alt="VibeHub Logo" className="w-28 sm:w-32 mb-1 drop-shadow-md" />
-        </Link>
-      </div>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-[#06b6d4] via-[#2563eb] to-[#6366f1] p-4 font-sans">
+      <img src={VibeHubLogo} alt="logo" className="w-28 sm:w-32 mb-4 drop-shadow-md" />
 
       <motion.div
-        initial={{ opacity: 0, scale: 0.7, y: 50 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="w-full max-w-md space-y-8"
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="bg-white rounded-2xl shadow-2xl border border-slate-100 p-8 w-full max-w-md text-center"
       >
-        <div className="bg-gradient-to-bl from-[#ffe4e6] to-[#ccfbf1] p-8 sm:p-10 rounded-t-xl shadow-2xl border border-gray-100 flex flex-col items-center text-center">
-          <div className="text-4xl w-[80px] mb-4 mx-auto">
-            <img src={mail} alt="mail" className="mx-auto" />
-          </div>
+        <img src={mail} alt="mail" className="w-20 mx-auto mb-3" />
+        <h1 className="text-2xl font-semibold text-slate-800 mb-2">Confirm Your Email</h1>
+        <p className="text-sm text-slate-600 mb-3">
+          We sent a code to <span className="font-medium text-[#2563eb]">{userEmail}</span>
+        </p>
 
-          <h1 className="text-2xl font-semibold text-gray-900 mb-2">
-            Confirm Your Email
-          </h1>
-
-          <p className="text-sm text-gray-500 leading-relaxed mb-4">
-            Enter the confirmation code we sent to{" "}
-            <span className="font-medium text-indigo-600 break-all">
-              {userEmail || "your email"}
-            </span>
-            .{" "}
-            <button
-              onClick={handleResend}
-              className="text-indigo-500 hover:text-indigo-600 font-medium transition duration-150"
-            >
-              Resend code
-            </button>
-          </p>
-
-          <div className="flex justify-center gap-3 mt-4">
-            {otpValues.map((val, index) => (
-              <input
-                key={index}
-                type="tel"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                maxLength="1"
-                value={val}
-                onChange={(e) => handleOtpChange(e, index)}
-                onKeyDown={(e) => handleOtpKeyDown(e, index)}
-                ref={(el) => (inputRefs.current[index] = el)}
-                className="w-12 h-12 text-center border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-lg font-semibold shadow-sm transition duration-150"
-              />
-            ))}
-          </div>
-
-          {message.text && (
-            <div
-              className={`mt-4 flex items-center justify-center gap-2 text-sm font-medium ${
-                message.type === "error" ? "text-red-500" : "text-green-600"
-              }`}
-            >
-              {message.type === "success" && (
-                <CheckCheck width={24} height={24} stroke="#16a34a" />
-              )}
-              <p>{message.text}</p>
-            </div>
-          )}
-
-          <button
-            onClick={handleNext}
-            disabled={loading}
-            className={`mt-6 w-full flex justify-center items-center py-3 px-4 border border-transparent text-base font-semibold rounded-lg shadow-md text-white ${
-              loading
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-indigo-500 hover:bg-indigo-600 focus:ring-indigo-500"
-            } transition duration-300 ease-in-out`}
-          >
-            {loading ? (
-              <svg
-                className="animate-spin h-5 w-5 mr-3 text-white"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.37 0 0 5.37 0 12h4zm2 5.29A7.96 7.96 0 014 12H0c0 3.04 1.13 5.82 3 7.94l3-2.65z"
-                ></path>
-              </svg>
-            ) : (
-              "Verify"
-            )}
-          </button>
-
-          <button
-            onClick={handleGoBack}
-            className="mt-4 text-sm font-medium text-indigo-500 hover:text-indigo-600 transition duration-150"
-          >
-            Go back
-          </button>
+        <div className="flex justify-center gap-3 mt-4">
+          {otpValues.map((val, i) => (
+            <input
+              key={i}
+              type="tel"
+              maxLength="1"
+              value={val}
+              onChange={(e) => handleOtpChange(e, i)}
+              onKeyDown={(e) => handleOtpKeyDown(e, i)}
+              ref={(el) => (inputRefs.current[i] = el)}
+              className="w-10 h-10 text-center border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#4A7C8C] text-lg font-semibold"
+            />
+          ))}
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.7 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3, duration: 0.5 }}
-          className="bg-gradient-to-bl from-[#ffe4e6] to-[#ccfbf1] p-4 rounded-b-xl shadow-lg border border-gray-100 text-center"
-        >
-          <p className="text-sm text-gray-600">
-            Have an account?{" "}
-            <button
-              onClick={handleLogin}
-              className="font-semibold text-indigo-500 hover:text-indigo-600 transition duration-150"
-            >
-              Log in
-            </button>
+        {message.text && (
+          <p className={`mt-3 text-sm font-medium ${message.type === "error" ? "text-red-500" : "text-green-600"}`}>
+            {message.text}
           </p>
-        </motion.div>
+        )}
+
+        <button
+          onClick={handleNext}
+          disabled={loading}
+          className={`mt-6 w-full py-2 rounded-lg text-white font-semibold transition ${
+            loading
+              ? "bg-slate-400 cursor-not-allowed"
+              : "bg-gradient-to-r from-[#4A7C8C] to-[#1D5464] hover:shadow-lg"
+          }`}
+        >
+          {loading ? "Verifying..." : "Verify"}
+        </button>
+
+        <Link to="/register" className="mt-4 inline-block text-sm text-[#4A7C8C] hover:text-[#1D5464]">
+          Go Back
+        </Link>
       </motion.div>
     </div>
   );

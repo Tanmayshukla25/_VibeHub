@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { UserPlus, UserCheck, Sparkles } from "lucide-react";
 import instance from "../axiosConfig";
 import defaultpic from "../assets/Defaultpic.png";
 
@@ -11,7 +12,9 @@ const Explore = () => {
   useEffect(() => {
     const fetchLoggedInUser = async () => {
       try {
-        const res = await instance.get("/user/verifyToken", { withCredentials: true });
+        const res = await instance.get("/user/verifyToken", {
+          withCredentials: true,
+        });
         setLoggedInUserId(res.data.user.id || res.data.user._id);
       } catch (error) {
         console.error("Error fetching logged-in user:", error);
@@ -25,7 +28,9 @@ const Explore = () => {
   useEffect(() => {
     const fetchAllUsers = async () => {
       try {
-        const response = await instance.get("/user/all", { withCredentials: true });
+        const response = await instance.get("/user/all", {
+          withCredentials: true,
+        });
         setGetAllUsers(response.data.users);
       } catch (error) {
         console.error("Error fetching users:", error);
@@ -43,62 +48,109 @@ const Explore = () => {
     );
   };
 
-  const filteredUsers = getAllUsers.filter((user) => user._id !== loggedInUserId);
+  const filteredUsers = getAllUsers.filter(
+    (user) => user._id !== loggedInUserId
+  );
+
+  const formatFollowers = (count) => {
+    if (!count) return "0";
+    if (count >= 1000) {
+      return (count / 1000).toFixed(1) + "K";
+    }
+    return count;
+  };
 
   return (
-    <div className="px-6 py-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
       {/* Header Section */}
-      <div className="flex justify-center gap-6 mb-6">
-        <button className="px-6 py-2 bg-gradient-to-r from-[#4ade80] to-[#14b8a6] text-white rounded-full shadow-md hover:opacity-90 transition-all">
-          Followers
-        </button>
-        <button className="px-6 py-2 bg-gradient-to-r from-[#60a5fa] to-[#2563eb] text-white rounded-full shadow-md hover:opacity-90 transition-all">
-          Following
-        </button>
+      <div className="bg-white/80 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-10 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center gap-2">
+            <div className="bg-gradient-to-br from-[#4A7C8C] to-[#1D5464] p-2 rounded-lg shadow-md">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-slate-800">Discover People</h1>
+              <p className="text-slate-600 text-xs mt-0.5">Connect with amazing creators</p>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* User Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {filteredUsers.length > 0 ? (
-          filteredUsers.map((user) => (
-            <div
-              key={user._id}
-              className="bg-gradient-to-bl from-[#f9fafb] to-[#e0f2fe] p-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 flex flex-col items-start"
-            >
-              {/* Top Row: Image + Info */}
-              <div className="flex items-center gap-4 w-full">
-                <img
-                  src={user.profilePic || defaultpic}
-                  alt={user.username}
-                  className="w-14 h-14 rounded-full object-cover border-2 border-gray-300"
-                />
-                <div className="flex flex-col text-left">
-                  <h2 className="font-semibold text-gray-800 text-base">
-                    {user.name}
-                  </h2>
-                  <p className="text-gray-600 text-sm">{user.username}</p>
-                  <p className="text-gray-500 text-xs line-clamp-2">
-                    {user.bio || "No bio available"}
-                  </p>
+      {/* User Cards Grid */}
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          {filteredUsers.length > 0 ? (
+            filteredUsers.map((user) => (
+              <div
+                key={user._id}
+                className="group bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden border border-slate-100 hover:border-[#4A7C8C]/30 hover:-translate-y-1"
+              >
+                {/* Card Header with Gradient */}
+                <div className="h-16 bg-gradient-to-br from-[#4A7C8C] to-[#1D5464] relative">
+                  <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2">
+                    <div className="relative">
+                      <img
+                        src={user.profilePic || defaultpic}
+                        alt={user.name}
+                        className="w-16 h-16 rounded-xl object-cover border-3 border-white shadow-lg"
+                      />
+                      <div className="absolute -bottom-0.5 -right-0.5 bg-green-500 w-4 h-4 rounded-full border-2 border-white"></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card Content */}
+                <div className="pt-10 px-3 pb-3">
+                  <div className="mb-3 text-center">
+                    <h2 className="font-bold text-slate-800 text-sm mb-0.5 group-hover:text-[#1D5464] transition-colors truncate">
+                      {user.name}
+                    </h2>
+                    <p className="text-[#4A7C8C] text-xs font-medium mb-1.5 truncate">
+                      {user.username}
+                    </p>
+                    <p className="text-slate-600 text-xs line-clamp-2 leading-relaxed">
+                      {user.bio || "No bio available"}
+                    </p>
+                  </div>
+
+                  {/* Stats */}
+                 
+
+                  {/* Follow Button */}
+                  <button
+                    onClick={() => handleFollow(user._id)}
+                    className={`w-full py-2 rounded-lg font-semibold text-xs transition-all duration-300 flex items-center justify-center gap-1.5 ${
+                      followedUsers.includes(user._id)
+                        ? "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                        : "bg-gradient-to-r from-[#4A7C8C] to-[#1D5464] text-white hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
+                    }`}
+                  >
+                    {followedUsers.includes(user._id) ? (
+                      <>
+                        <UserCheck className="w-3.5 h-3.5" />
+                        Following
+                      </>
+                    ) : (
+                      <>
+                        <UserPlus className="w-3.5 h-3.5" />
+                        Follow
+                      </>
+                    )}
+                  </button>
                 </div>
               </div>
-
-              {/* Follow Button */}
-              <button
-                onClick={() => handleFollow(user._id)}
-                className={`mt-3 w-full py-1.5 rounded-lg text-sm font-medium transition-all duration-300 ${
-                  followedUsers.includes(user._id)
-                    ? "bg-gray-200 text-gray-800"
-                    : "bg-gradient-to-r from-[#2dd4bf] to-[#1f2937] text-white hover:opacity-90"
-                }`}
-              >
-                {followedUsers.includes(user._id) ? "Following" : "Follow"}
-              </button>
+            ))
+          ) : (
+            <div className="col-span-full flex flex-col items-center justify-center py-16">
+              <div className="bg-slate-100 rounded-full p-6 mb-4">
+                <Sparkles className="w-12 h-12 text-slate-400" />
+              </div>
+              <p className="text-slate-500 text-lg font-medium">No users found</p>
+              <p className="text-slate-400 text-sm mt-2">Start exploring to find people</p>
             </div>
-          ))
-        ) : (
-          <p className="col-span-full text-center text-gray-500">No users found</p>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

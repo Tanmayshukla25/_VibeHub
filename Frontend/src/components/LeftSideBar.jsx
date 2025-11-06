@@ -14,20 +14,18 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import instance from "../axiosConfig";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import VibeHubLogo from "../assets/VibeHub.png";
-import defaultPic from "../assets/Defalutpic.png"; 
+import defaultPic from "../assets/Defalutpic.png";
 
 const Sidebar = () => {
   const [active, setActive] = useState("Home");
   const [showMore, setShowMore] = useState(false);
   const [message, setMessage] = useState(null);
-  const [user, setUser] = useState(null); 
+  const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation(); // ✅ detect current route
 
-
-
-  
   // ✅ Fetch user data on mount
   useEffect(() => {
     const fetchUser = async () => {
@@ -46,7 +44,6 @@ const Sidebar = () => {
     };
     fetchUser();
   }, []);
-
 
   const handleLogout = async () => {
     try {
@@ -102,7 +99,7 @@ const Sidebar = () => {
       </AnimatePresence>
 
       {/* 🔹 Desktop Sidebar */}
-      <div className="hidden md:flex h-screen w-[250px] border-r border-gray-200  flex-col justify-between fixed bg-gradient-to-tl from-[#a2d2df] via-[#f6efbd] to-[#e4c087]">
+      <div className="hidden md:flex h-screen w-[250px] border-r border-gray-200 flex-col justify-between fixed bg-[#719FB0]">
         <div>
           <div className="w-[210px] h-[130px]">
             <img src={VibeHubLogo} className="w-full h-full" alt="logo" />
@@ -252,8 +249,18 @@ const Sidebar = () => {
         </div>
       </div>
 
+      {/* 🔹 Top Bar — Show only on Home Page */}
+     {location.pathname === "/home" && (
+  <div className="fixed top-0 left-0 right-0 z-30 flex justify-between items-center bg-[#719FB0] backdrop-blur-md border-b border-gray-300 shadow-sm px-4  md:hidden">
+    <img src={VibeHubLogo} alt="VibeHub Logo" className="w-18 h-auto" />
+    <div className="flex items-center gap-6">
+      <Heart size={24} className="cursor-pointer hover:text-gray-600" />
+      <Send size={24} className="cursor-pointer hover:text-gray-600" />
+    </div>
+  </div>
+)}
       {/* 🔹 Mobile Bottom Navbar */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 flex md:hidden justify-around items-center bg-gradient-to-r from-[#a2d2df] via-[#f6efbd] to-[#e4c087] py-3 border-t border-gray-300 shadow-lg">
+      <div className="fixed bottom-0 left-0 right-0 z-40 flex md:hidden justify-around items-center bg-[#719FB0] py-3 border-t border-gray-300 shadow-lg">
         <Link to="/home">
           <Home
             size={26}
@@ -272,13 +279,15 @@ const Sidebar = () => {
           />
         </Link>
 
-        <PlusSquare
-          size={28}
-          onClick={() => setActive("Create")}
-          className={`${
-            active === "Create" ? "text-black scale-110" : "text-gray-600"
-          } transition-transform`}
-        />
+      <Link to="/home/explore">
+  <Compass
+    size={26}
+    onClick={() => setActive("Explore")}
+    className={`${
+      active === "Explore" ? "text-black scale-110" : "text-gray-600"
+    } transition-transform`}
+  />
+</Link>
 
         <Clapperboard
           size={26}

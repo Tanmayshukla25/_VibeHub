@@ -12,6 +12,9 @@ import ProtectedRoute from "./ProtectedRoute";
 import UserProfile from "./SideBarComponents/UserProfile";
 import { UserContext } from "./UserContext"; 
 import SearchBar from "./SideBarComponents/searchBar";
+import Followers from "./Connections/Followers";
+import Post from "./Connections/post";
+import Following from "./Connections/following";
 
 const App = () => {
  
@@ -40,6 +43,9 @@ const App = () => {
         { path: "/home/explore", element: <Explore /> },
         { path: "/home/UserProfile", element: <UserProfile /> },
         { path: "/home/SearchBar", element: <SearchBar/> },
+        { path: "/home/post", element: <Post/> },
+        { path: "/home/following", element: <Following/> },
+        { path: "/home/Followers", element: <Followers/> },
       ],
     },
   ]);

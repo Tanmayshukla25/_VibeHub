@@ -162,16 +162,14 @@ const Login = () => {
 
   return (
     <div 
-     
-      className="flex flex-col lg:flex-row justify-center lg:justify-between items-center h-screen w-screen bg-gradient-to-tl from-[#a2d2df] via-[#f6efbd] to-[#e4c087] relative overflow-y-auto"
+      className="flex flex-col lg:flex-row justify-center lg:justify-between items-center h-screen w-screen bg-gradient-to-b from-[#06b6d4] via-[#2563eb] to-[#6366f1] relative overflow-y-auto"
     >
       
       <div className="hidden lg:flex relative items-center justify-center h-full">
         <AnimatedText
           text="VibeHub"
           speed={150}
-      
-          className="hidden xl:block text-[70px] text-gray-800 billabong-font absolute left-0"
+          className="hidden xl:block text-[70px] text-slate-800 billabong-font absolute left-0"
           style={{
             transform: "rotate(270deg)",
             fontFamily: "Billabong, cursive",
@@ -181,7 +179,7 @@ const Login = () => {
         <img
           src={LoginImg}
           alt="VibeHub Login Illustration"
-          className="w-[450px] h-[450px] xl:w-[600px] xl:h-[600px] object-contain ml-30 filter drop-shadow-[10px_10px_10px_#000]"
+          className="w-[450px] h-[450px] xl:w-[600px] xl:h-[600px] object-contain ml-30 filter drop-shadow-[10px_10px_10px_#00000030]"
         />
       </div>
 
@@ -190,36 +188,33 @@ const Login = () => {
         initial={{ opacity: 0, scale: 0.8, y: 50 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-      
-        className="flex flex-col shadow shadow-gray-700 rounded-2xl justify-center items-center w-full max-w-xs sm:max-w-sm mx-auto lg:ml-auto lg:mr-24"
+        className="flex flex-col shadow-lg rounded-2xl justify-center items-center w-full max-w-xs sm:max-w-sm mx-auto lg:ml-auto lg:mr-24"
       >
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.6 }}
-          className="rounded-t-2xl bg-gradient-to-bl from-[#ffe4e6] to-[#ccfbf1] p-8 pt-4 pb-4 w-full flex flex-col items-center shadow-xl"
+          className="rounded-t-2xl bg-white p-8 pt-4 pb-4 w-full flex flex-col items-center shadow-xl border border-slate-100"
         >
           <h1
-            className="text-4xl my-4 text-gray-800"
+            className="text-4xl my-4 bg-gradient-to-r from-[#4A7C8C] to-[#1D5464] bg-clip-text text-transparent"
             style={{ fontFamily: "Billabong, cursive" }}
           >
             VibeHub
           </h1>
 
           <form onSubmit={handleSubmit} className="w-full">
-         
             <input
               type="text"
               name="email"
               placeholder="Enter your Gmail address"
               onChange={handleChange}
               value={formData.email}
-              className="w-full border border-gray-300 bg-gray-50 p-2 text-sm mb-1 rounded focus:ring-0 focus:border-gray-400"
+              className="w-full border border-slate-200 bg-slate-50 p-2 text-sm mb-1 rounded-lg focus:ring-2 focus:ring-[#4A7C8C] focus:border-[#4A7C8C] outline-none transition"
               required
             />
             {emailError && <p className="text-red-500 text-xs mb-2">{emailError}</p>}
 
-          
             <div className="relative mb-2">
               <input
                 type={showPassword ? "text" : "password"}
@@ -227,12 +222,12 @@ const Login = () => {
                 placeholder="Password (min 8 chars)"
                 onChange={handleChange}
                 value={formData.password}
-                className="w-full border border-gray-300 bg-gray-50 p-2 text-sm rounded focus:ring-0 focus:border-gray-400 pr-10"
+                className="w-full border border-slate-200 bg-slate-50 p-2 text-sm rounded-lg focus:ring-2 focus:ring-[#4A7C8C] focus:border-[#4A7C8C] outline-none transition pr-10"
                 required
               />
               <span
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-2.5 text-gray-600 cursor-pointer"
+                className="absolute right-3 top-2.5 text-slate-600 cursor-pointer hover:text-[#4A7C8C] transition"
               >
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
               </span>
@@ -240,10 +235,9 @@ const Login = () => {
 
             {passwordError && <p className="text-red-500 text-xs mt-1">{passwordError}</p>}
 
-        
             {formData.password && (
               <div className="w-full mt-1 mb-2">
-                <div className="flex justify-between text-xs text-gray-600">
+                <div className="flex justify-between text-xs text-slate-600">
                   <span>Password Strength:</span>
                   <span
                     className={`font-medium ${
@@ -257,7 +251,7 @@ const Login = () => {
                     {getPasswordStrengthText()}
                   </span>
                 </div>
-                <div className="w-full bg-gray-200 h-2 rounded-full">
+                <div className="w-full bg-slate-200 h-2 rounded-full">
                   <div
                     className={`h-2 rounded-full transition-all duration-300 ${getPasswordStrengthColor()}`}
                     style={{ width: `${(passwordStrength / 5) * 100}%` }}
@@ -266,7 +260,6 @@ const Login = () => {
               </div>
             )}
 
-        
             {message.text && (
               <p
                 className={`text-sm text-center font-medium mb-2 ${
@@ -277,44 +270,41 @@ const Login = () => {
               </p>
             )}
 
-           
             <button
               type="submit"
               disabled={isFormInvalid || loading}
-              className={`w-full py-1.5 rounded-lg font-semibold text-sm text-white transition flex justify-center items-center ${
+              className={`w-full py-2 rounded-lg font-semibold text-sm text-white transition flex justify-center items-center ${
                 isFormInvalid || loading
-                  ? "bg-gray-300 cursor-not-allowed"
-                  : "bg-gradient-to-r from-[#4ade80] via-[#14b8a6] to-[#0891b2] hover:bg-blue-500 cursor-pointer"
+                  ? "bg-slate-300 cursor-not-allowed"
+                  : "bg-gradient-to-r from-[#4A7C8C] to-[#1D5464] hover:shadow-lg cursor-pointer"
               }`}
             >
               {loading ? <Loader /> : "Log in"}
             </button>
           </form>
 
-      
           <div className="flex items-center w-full my-4">
-            <div className="flex-grow border-t border-gray-300"></div>
-            <span className="mx-4 text-gray-500 text-sm font-semibold">OR</span>
-            <div className="flex-grow border-t border-gray-300"></div>
+            <div className="flex-grow border-t border-slate-200"></div>
+            <span className="mx-4 text-slate-500 text-sm font-semibold">OR</span>
+            <div className="flex-grow border-t border-slate-200"></div>
           </div>
 
-          <Link className="text-xs text-blue-900 hover:underline">
+          <Link className="text-xs text-[#4A7C8C] hover:text-[#1D5464] hover:underline transition">
             Forgotten your password?
           </Link>
         </motion.div>
 
-     
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.6 }}
-          className="rounded-b-2xl bg-gradient-to-bl from-[#ffe4e6] to-[#ccfbf1] p-5 w-full mt-2 text-center text-sm shadow-xl"
+          className="rounded-b-2xl bg-white p-5 w-full mt-2 text-center text-sm shadow-xl border border-slate-100"
         >
-          <p>
-            Don’t have an account?{" "}
+          <p className="text-slate-700">
+            Don't have an account?{" "}
             <Link
               to="/Register"
-              className="text-blue-500 font-semibold hover:text-blue-700"
+              className="text-[#4A7C8C] font-semibold hover:text-[#1D5464] transition"
             >
               Sign up
             </Link>
@@ -322,7 +312,7 @@ const Login = () => {
         </motion.div>
       </motion.div>
 
-      <div className="absolute bottom-4 w-full text-center text-xs text-gray-700">
+      <div className="absolute bottom-4 w-full text-center text-xs text-slate-600">
         <p>From Meta</p>
       </div>
     </div>

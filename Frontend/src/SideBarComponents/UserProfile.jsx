@@ -1,9 +1,21 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Camera, Plus, X } from "lucide-react";
+import {
+  Camera,
+  Plus,
+  X,
+  Menu,
+  CircleX,
+  LogOut,
+  Globe,
+  Calendar,
+  Lock,
+  Unlock,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import instance from "../axiosConfig";
 import defaultPic from "../assets/Defalutpic.png";
 import { UserContext } from "../UserContext";
+import { Link, useNavigate } from "react-router-dom";
 
 const UserProfile = () => {
   const { auth } = useContext(UserContext);
@@ -15,7 +27,7 @@ const UserProfile = () => {
   const [profilePic, setProfilePic] = useState(null);
   const [preview, setPreview] = useState(null);
   const [uploading, setUploading] = useState(false);
-
+  const [showMenu, setShowMenu] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editData, setEditData] = useState({
     name: "",
@@ -26,8 +38,8 @@ const UserProfile = () => {
     website: "",
     isPrivate: false,
   });
+  const navigate = useNavigate();
 
-  
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
@@ -51,14 +63,12 @@ const UserProfile = () => {
     fetchUserDetails();
   }, []);
 
-  // ✅ Handle profile picture change
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setProfilePic(file);
     setPreview(URL.createObjectURL(file));
   };
 
-  // ✅ Upload only profile picture
   const handleUpdateProfilePic = async () => {
     if (!profilePic || !user?._id) return;
 
@@ -88,7 +98,6 @@ const UserProfile = () => {
     }
   };
 
-  // ✅ Open edit modal
   const openEditModal = () => {
     if (!user) return;
     setEditData({
@@ -103,7 +112,6 @@ const UserProfile = () => {
     setShowEditModal(true);
   };
 
-  // ✅ Handle edit field changes
   const handleEditChange = (e) => {
     const { name, value, type, checked } = e.target;
     setEditData((prev) => ({
@@ -112,7 +120,6 @@ const UserProfile = () => {
     }));
   };
 
-  // ✅ Submit updates
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
 
@@ -142,290 +149,418 @@ const UserProfile = () => {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      const res = await instance.post(
+        "/user/logout",
+        {},
+        { withCredentials: true }
+      );
+      setSuccess(res.data.message || "Logout successful!");
+      setTimeout(() => {
+        navigate("/");
+      }, 1500);
+    } catch (error) {
+      setError("Logout failed. Try again.");
+    }
+  };
+
   if (loading)
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <p className="animate-pulse text-gray-500 font-semibold text-lg">
-          Loading profile...
-        </p>
+      <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-[#4A7C8C] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-slate-600 font-medium">Loading profile...</p>
+        </div>
       </div>
     );
 
   if (error || !user)
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <p className="text-red-500 font-semibold">
-          {error || "User not found"}
-        </p>
+      <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
+        <div className="text-center">
+          <p className="text-red-500 font-semibold text-lg">
+            {error || "User not found"}
+          </p>
+        </div>
       </div>
     );
 
   return (
-    <>
-      {/* ✅ Edit Modal */}
-  
+    <div className="flex-grow min-h-[100vh] bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
+      {/* Edit Modal */}
+      <AnimatePresence>
+        {showEditModal && (
+          <>
+            <motion.div
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowEditModal(false)}
+            />
 
-<AnimatePresence>
-  {showEditModal && (
-    <>
-     
-      <motion.div
-        className="fixed inset-0 bg-black/70 backdrop-blur-md z-40"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={() => setShowEditModal(false)}
-      />
-
-     
-      <motion.div
-        className="fixed inset-0 flex justify-center items-center z-50 p-4" 
-        initial={{ scale: 0.9, y: 50, opacity: 0 }} 
-        animate={{ scale: 1, y: 0, opacity: 1 }}
-        exit={{ scale: 0.9, y: 50, opacity: 0 }}
-        transition={{ duration: 0.3 }}
-      >
-        <div 
-          className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-lg relative 
-          bg-gradient-to-br from-white to-teal-50/50" 
-        >
-        
-          <button
-            className="absolute top-4 right-4 text-gray-500 hover:text-red-500 transition duration-150"
-            onClick={() => setShowEditModal(false)}
-            aria-label="Close modal"
-          >
-            
-            <X size={24} /> 
-          </button>
-
-          <h2 className="text-2xl font-bold mb-6 text-center text-gray-800 border-b pb-2">
-            ✨ Edit Profile
-          </h2>
-
-          <form onSubmit={handleUpdateProfile} className="space-y-4">
-            
-           
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {[
-                { label: "Full Name", name: "name" },
-                { label: "Username", name: "username" },
-                { label: "Email", name: "email", type: "email" },
-                { label: "Website URL", name: "website", type: "text" },
-              ].map((field) => (
-                <div key={field.name}>
-                  <label className="block text-sm text-gray-700 font-medium mb-1">
-                    {field.label}
-                  </label>
-                  <input
-                    type={field.type || "text"}
-                    name={field.name}
-                    value={editData[field.name]}
-                    onChange={handleEditChange}
-                    
-                    className="w-full border border-gray-300 rounded-lg p-2.5 text-gray-700 
-                                 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition duration-200"
-                    required={field.name === 'name' || field.name === 'username' || field.name === 'email'}
-                  />
-                </div>
-              ))}
-            </div>
-
-            
-            <div>
-              <label className="block text-sm text-gray-700 font-medium mb-1">
-                Bio
-              </label>
-              <textarea
-                name="bio"
-                value={editData.bio}
-                onChange={handleEditChange}
-                rows="3"
-                className="w-full border border-gray-300 rounded-lg p-2.5 text-gray-700 
-                           focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition duration-200 resize-none"
-                placeholder="Tell us about yourself..."
-              />
-            </div>
-
-          
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t mt-4 border-gray-100">
-              
-              
-              <div>
-                <label className="block text-sm text-gray-700 font-medium mb-1">
-                  Date of Birth
-                </label>
-                <input
-                  type="date"
-                  name="dob"
-                  value={editData.dob}
-                  onChange={handleEditChange}
-                  className="w-full border border-gray-300 rounded-lg p-2.5 text-gray-700 
-                             focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition duration-200"
-                />
-              </div>
-
-            
-              <div className="flex items-end h-full">
-                <div className="flex items-center p-2.5 border border-gray-300 rounded-lg w-full bg-gray-50/50">
-                  <input
-                    type="checkbox"
-                    id="isPrivate"
-                    name="isPrivate"
-                    checked={editData.isPrivate}
-                    onChange={handleEditChange}
-                   
-                    className="h-5 w-5 text-teal-600 border-gray-300 rounded focus:ring-teal-500 mr-3" 
-                  />
-                  <label htmlFor="isPrivate" className="text-gray-700 font-medium text-sm">
-                    Make Account Private
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            
-            <button
-              type="submit"
-              disabled={uploading}
-              className={`w-full py-3 mt-6 rounded-xl text-white font-bold text-lg transition-all transform hover:scale-[1.01] duration-300 shadow-lg ${
-                uploading
-                  ? "bg-gray-400 cursor-not-allowed shadow-gray-300"
-                  : "bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 shadow-teal-400/50"
-              }`}
+            <motion.div
+              className="fixed inset-0 flex justify-center items-center z-50 p-4"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ duration: 0.3 }}
             >
-              {uploading ? "💾 Updating Profile..." : "Save Changes"}
-            </button>
-            
-          </form>
-        </div>
-      </motion.div>
-    </>
-  )}
-</AnimatePresence>
-
-   
-      <div className="flex justify-center items-center  p-4">
-        <div className="w-full max-w-md  text-center ">
-          <div className="flex items-center justify-between gap-5 mb-8">
-            <div className="relative group">
-              {auth?._id === user?.id ? (
-                <label
-                  htmlFor="profilePic"
-                  onMouseEnter={() => setIsHovered(true)}
-                  onMouseLeave={() => setIsHovered(false)}
-                  className="cursor-pointer"
+              <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-2xl relative max-h-[90vh] overflow-y-auto">
+                <button
+                  className="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition"
+                  onClick={() => setShowEditModal(false)}
                 >
-                  <div className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center overflow-hidden ring-4 ring-white shadow-lg transition-all duration-300 group-hover:scale-105 group-hover:ring-blue-300">
-                    <img
-                      src={preview || user?.profilePic || defaultPic}
-                      alt="profile"
-                      className="w-full h-full object-cover"
+                  <X size={24} />
+                </button>
+
+                <h2 className="text-2xl font-bold mb-6 text-slate-800 flex items-center gap-2">
+                  <div className="w-1 h-8 bg-gradient-to-b from-[#4A7C8C] to-[#1D5464] rounded-full"></div>
+                  Edit Profile
+                </h2>
+
+                <div className="space-y-5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {[
+                      { label: "Full Name", name: "name", icon: "👤" },
+                      { label: "Username", name: "username", icon: "@" },
+                      {
+                        label: "Email",
+                        name: "email",
+                        type: "email",
+                        icon: "✉️",
+                      },
+                      {
+                        label: "Website URL",
+                        name: "website",
+                        type: "text",
+                        icon: "🌐",
+                      },
+                    ].map((field) => (
+                      <div key={field.name}>
+                        <label className="block text-sm text-slate-700 font-medium mb-2">
+                          {field.icon} {field.label}
+                        </label>
+                        <input
+                          type={field.type || "text"}
+                          name={field.name}
+                          value={editData[field.name]}
+                          onChange={handleEditChange}
+                          className="w-full border border-slate-200 rounded-xl p-3 text-slate-700 focus:ring-2 focus:ring-[#4A7C8C] focus:border-[#4A7C8C] outline-none transition"
+                          required={
+                            field.name === "name" ||
+                            field.name === "username" ||
+                            field.name === "email"
+                          }
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm text-slate-700 font-medium mb-2">
+                      📝 Bio
+                    </label>
+                    <textarea
+                      name="bio"
+                      value={editData.bio}
+                      onChange={handleEditChange}
+                      rows="3"
+                      className="w-full border border-slate-200 rounded-xl p-3 text-slate-700 focus:ring-2 focus:ring-[#4A7C8C] focus:border-[#4A7C8C] outline-none transition resize-none"
+                      placeholder="Tell us about yourself..."
                     />
                   </div>
-                  <div
-                    className={`absolute bottom-13 right-0 bg-gradient-to-r from-[#4ade80] via-[#14b8a6] to-[#0891b2] p-2.5 rounded-full shadow-lg transition-all duration-300 ${
-                      isHovered ? "scale-110" : ""
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm text-slate-700 font-medium mb-2">
+                        📅 Date of Birth
+                      </label>
+                      <input
+                        type="date"
+                        name="dob"
+                        value={editData.dob}
+                        onChange={handleEditChange}
+                        className="w-full border border-slate-200 rounded-xl p-3 text-slate-700 focus:ring-2 focus:ring-[#4A7C8C] focus:border-[#4A7C8C] outline-none transition"
+                      />
+                    </div>
+
+                    <div className="flex items-end">
+                      <label className="flex items-center gap-3 p-3 border border-slate-200 rounded-xl w-full cursor-pointer hover:bg-slate-50 transition">
+                        <input
+                          type="checkbox"
+                          name="isPrivate"
+                          checked={editData.isPrivate}
+                          onChange={handleEditChange}
+                          className="h-5 w-5 text-[#4A7C8C] border-slate-300 rounded focus:ring-[#4A7C8C]"
+                        />
+                        <span className="text-slate-700 font-medium text-sm flex items-center gap-2">
+                          {editData.isPrivate ? (
+                            <Lock size={16} />
+                          ) : (
+                            <Unlock size={16} />
+                          )}
+                          Private Account
+                        </span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleUpdateProfile}
+                    disabled={uploading}
+                    className={`w-full py-3 mt-6 rounded-xl text-white font-semibold transition-all transform hover:scale-[1.01] ${
+                      uploading
+                        ? "bg-slate-400 cursor-not-allowed"
+                        : "bg-gradient-to-r from-[#4A7C8C] to-[#1D5464] hover:shadow-lg"
                     }`}
                   >
-                    <Camera className="w-5 h-5 text-white" />
-                  </div>
-                  <input
-                    type="file"
-                    id="profilePic"
-                    className="hidden"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                  />
-                </label>
-              ) : (
-                <div>
-                  <div className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center overflow-hidden ring-4 ring-white shadow-lg">
+                    {uploading ? "💾 Updating..." : "Save Changes"}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Mobile Back Button */}
+      <div
+        onClick={() => navigate("/home")}
+        className="bg-gradient-to-r from-[#4A7C8C] to-[#1D5464] sm:hidden block text-white fixed top-4 left-4 p-2.5 rounded-full shadow-lg cursor-pointer hover:scale-110 transition z-50"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={2.5}
+          stroke="currentColor"
+          className="w-5 h-5"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M15.75 19.5L8.25 12l7.5-7.5"
+          />
+        </svg>
+      </div>
+
+      {/* Mobile Menu */}
+      <div className="fixed top-4 right-4 z-50 md:hidden">
+        <div
+          className="bg-gradient-to-r from-[#4A7C8C] to-[#1D5464] text-white p-2.5 rounded-full shadow-lg cursor-pointer hover:scale-110 transition"
+          onClick={() => setShowMenu((prev) => !prev)}
+        >
+          {showMenu ? <CircleX size={22} /> : <Menu size={22} />}
+        </div>
+
+        <AnimatePresence>
+          {showMenu && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="absolute right-0 mt-3 bg-white shadow-xl rounded-xl border border-slate-200 py-2 w-44 overflow-hidden"
+            >
+              <div
+                onClick={handleLogout}
+                className="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-red-50 hover:text-red-600 cursor-pointer transition-all"
+              >
+                <LogOut size={20} />
+                <span className="font-medium">Logout</span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Profile Content */}
+      <div>
+        <div className="bg-white h-[100vh] shadow-xl overflow-hidden">
+          {/* Cover Header */}
+          <div className="h-32 bg-gradient-to-r from-[#4A7C8C] via-[#2d6374] to-[#1D5464] relative">
+            <div className="absolute -bottom-16 left-8">
+              <div className="relative group">
+                {auth?._id === user?.id ? (
+                  <label
+                    htmlFor="profilePic"
+                    onMouseEnter={() => setIsHovered(true)}
+                    onMouseLeave={() => setIsHovered(false)}
+                    className="cursor-pointer"
+                  >
+                    <div className="w-32 h-32 rounded-full bg-white p-1 shadow-2xl overflow-hidden transition-transform duration-300 group-hover:scale-105">
+                      <img
+                        src={preview || user?.profilePic || defaultPic}
+                        alt="profile"
+                        className="w-full h-full object-cover rounded-full"
+                      />
+                    </div>
+                    <div
+                      className={`absolute bottom-2 right-2 bg-gradient-to-r from-[#4A7C8C] to-[#1D5464] p-2 rounded-lg shadow-lg transition-all ${
+                        isHovered ? "scale-110" : ""
+                      }`}
+                    >
+                      <Camera className="w-4 h-4 text-white" />
+                    </div>
+                    <input
+                      type="file"
+                      id="profilePic"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                    />
+                  </label>
+                ) : (
+                  <div className="w-32 h-32 rounded-2xl bg-white p-1 shadow-2xl overflow-hidden">
                     <img
                       src={user?.profilePic || defaultPic}
                       alt="profile"
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover rounded-xl"
                     />
                   </div>
-                </div>
-              )}
-              <p className="text-sm text-gray-600 mt-3 mr-6">{user?.username}</p>
-              <p className="text-xs text-gray-500 mt-1 "><span className="font-bold text-black"> Bio:-</span> {user?.bio}</p>
-            </div>
-
-            <div className="text-left ml-4 flex-1">
-              <h2 className="text-xl font-semibold text-black">{user?.name}</h2>
-
-             
-              <div className="flex space-x-6 mt-3">
-                {[
-                  { label: "Posts", count: user?.posts?.length || 0 },
-                  { label: "Followers", count: user?.followers?.length || 0 },
-                  { label: "Following", count: user?.following?.length || 0 },
-                ].map((stat, i) => (
-                  <div key={i} className="text-center">
-                    <p className="font-semibold text-lg text-gray-800">
-                      {stat.count}
-                    </p>
-                    <p className="text-sm text-gray-600">{stat.label}</p>
-                  </div>
-                ))}
+                )}
               </div>
             </div>
           </div>
-          <a href={user?.website} target="_blank" rel="noopener noreferrer">
-          
-            <p className="text-xs text-gray-500 mt-1">
-              <span className="font-bold text-black"> WebsiteLink:-</span>
-              <span className="text-blue-600">{user?.website}</span>
-            </p>
-          </a>
-          {preview && (
-            <button
-              onClick={handleUpdateProfilePic}
-              disabled={uploading}
-              className={`w-full py-2 rounded-lg text-white font-semibold transition-all ${
-                uploading
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-gradient-to-r from-[#2dd4bf]  to-[#1f2937] hover:from-blue-700 hover:to-blue-800"
-              }`}
-            >
-              {uploading ? "Uploading..." : "Save Image"}
-            </button>
-          )}
 
-          {success && (
-            <p className="text-green-600 text-sm mt-3 font-medium">{success}</p>
-          )}
-          {error && (
-            <p className="text-red-600 text-sm mt-3 font-medium">{error}</p>
-          )}
+          {/* Profile Info */}
+          <div className="pt-17 px-8 pb-8">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:gap-50 ">
+              <div className="">
+                <h1 className="sm:text-3xl text-[15px] font-bold text-slate-800 mb-1">
+                  {user?.name}
+                </h1>
+                <p className="text-[#4A7C8C] sm:text-[15px] text-[12px] font-medium sm:mb-1">
+                  {user?.username}
+                </p>
 
-          <div className="flex space-x-3 mt-8">
+                {user?.bio && (
+                  <p className="text-slate-600 text-sm leading-relaxed mb-4 max-w-xl">
+                    {user.bio}
+                  </p>
+                )}
+
+                <div className="flex flex-wrap gap-3 text-sm text-slate-600">
+                  {user?.website && (
+                    <a
+                      href={user.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 hover:text-[#4A7C8C] transition"
+                    >
+                      <Globe size={16} />
+                      <span className="underline">Website</span>
+                    </a>
+                  )}
+                  {user?.dob && (
+                    <div className="flex items-center gap-1.5">
+                      <Calendar size={16} />
+                      <span>
+                        Born {new Date(user.dob).toLocaleDateString()}
+                      </span>
+                    </div>
+                  )}
+                  {user?.isPrivate && (
+                    <div className="flex items-center gap-1.5 text-amber-600">
+                      <Lock size={16} />
+                      <span>Private Account</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-10 sm:pt-8 mb-3 border-slate-200">
+                <Link to="/home/post" className="group">
+                  <div className="text-center sm:p-4 rounded-xl bg-slate-50 hover:bg-gradient-to-br hover:from-[#4A7C8C]/10 hover:to-[#1D5464]/10 transition-all border border-slate-100 hover:border-[#4A7C8C]/30">
+                    <p className="sm:text-2xl font-bold text-slate-800 group-hover:text-[#1D5464] transition">
+                      {user?.posts?.length || 0}
+                    </p>
+                    <p className="sm:text-sm text-[12px] text-slate-600 mt-1">Posts</p>
+                  </div>
+                </Link>
+
+                <Link to="/home/followers" className="group">
+                  <div className="text-center sm:p-4 rounded-xl bg-slate-50 hover:bg-gradient-to-br hover:from-[#4A7C8C]/10 hover:to-[#1D5464]/10 transition-all border border-slate-100 hover:border-[#4A7C8C]/30">
+                    <p className="sm:text-2xl font-bold text-slate-800 group-hover:text-[#1D5464] transition">
+                      {user?.followers?.length || 0}
+                    </p>
+                    <p className="sm:text-sm text-[12px] text-slate-600 mt-1">Followers</p>
+                  </div>
+                </Link>
+
+                <Link to="/home/following" className="group">
+                  <div className="text-center sm:p-4 rounded-xl bg-slate-50 hover:bg-gradient-to-br hover:from-[#4A7C8C]/10 hover:to-[#1D5464]/10 transition-all border border-slate-100 hover:border-[#4A7C8C]/30">
+                    <p className="sm:text-2xl font-bold text-slate-800 group-hover:text-[#1D5464] transition">
+                      {user?.following?.length || 0}
+                    </p>
+                    <p className="sm:text-sm text-[12px] text-slate-600 mt-1">Following</p>
+                  </div>
+                </Link>
+              </div>
+
+              {/* Action Buttons */}
+            </div>
             {auth?._id === user?.id && (
+              <div className="flex gap-2">
+                <button
+                  onClick={openEditModal}
+                  className="sm:px-6 px-2 sm:text-[15px] py-1 sm:py-2.5 bg-gradient-to-r from-[#4A7C8C] to-[#1D5464] text-white sm:rounded-xl rounded text-[13px] sm:font-medium hover:shadow-lg transition-all hover:scale-105"
+                >
+                  Edit Profile
+                </button>
+                <button className="sm:px-6 px-2 sm:text-[15px] text-[13px]  bg-slate-100 text-slate-700 sm:rounded-xl rounded  sm:font-medium hover:bg-slate-200 transition">
+                  Archive
+                </button>
+              </div>
+            )}
+
+            {/* Stats */}
+
+            {/* Upload Profile Pic Button */}
+            {preview && (
               <button
-                onClick={openEditModal}
-                className=" text-white bg-gradient-to-r from-[#2dd4bf]  to-[#1f2937] hover:bg-gray-200 text-sm px-5 py-2 rounded-lg font-medium border border-gray-300 transition"
+                onClick={handleUpdateProfilePic}
+                disabled={uploading}
+                className={`w-full py-3 mt-6 rounded-xl text-white font-semibold transition-all ${
+                  uploading
+                    ? "bg-slate-400 cursor-not-allowed"
+                    : "bg-gradient-to-r from-[#4A7C8C] to-[#1D5464] hover:shadow-lg hover:scale-[1.01]"
+                }`}
               >
-                Edit Profile
+                {uploading ? "Uploading..." : "Save Profile Picture"}
               </button>
             )}
-            <button className="bg-gray-100 hover:bg-gray-200 text-sm px-5 py-2 rounded-lg font-medium border border-gray-300 transition">
-              View Archive
-            </button>
-          </div>
 
-          <div className="w-full border-t border-gray-300 my-8"></div>
+            {/* Messages */}
+            {success && (
+              <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-xl">
+                <p className="text-green-700 text-sm font-medium">{success}</p>
+              </div>
+            )}
+            {error && (
+              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl">
+                <p className="text-red-700 text-sm font-medium">{error}</p>
+              </div>
+            )}
 
-          <div className="flex flex-col items-center">
-            <div className="w-20 h-20 border-2 border-dashed border-gray-400 rounded-full flex items-center justify-center hover:bg-gray-50 hover:scale-105 transition cursor-pointer bg-white/50 backdrop-blur-sm shadow-inner">
-              <Plus size={32} className="text-gray-500" />
+            {/* New Post Section */}
+            <div className="mt-8 pt-6 border-t border-slate-200">
+              <div className="flex flex-col items-center">
+                <div className="sm:w-20 sm:h-20 border-2 border-dashed border-slate-300 rounded-2xl flex items-center justify-center hover:bg-slate-50 hover:border-[#4A7C8C] hover:scale-105 transition cursor-pointer group">
+                  <Plus
+                    size={32}
+                    className="text-slate-400 group-hover:text-[#4A7C8C]"
+                  />
+                </div>
+                <p className="text-slate-600 mt-3 text-sm font-medium">
+                  Create New Post
+                </p>
+              </div>
             </div>
-            <p className="text-gray-600 mt-2 text-sm font-medium">New</p>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { Sparkles } from "lucide-react";
 import instance from "../axiosConfig.js";
+import defaultpic from "../assets/Defaultpic.png";
 
 const SearchBar = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -7,7 +9,7 @@ const SearchBar = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Debounce timer to delay API calls until user stops typing
+  // Debounced search effect
   useEffect(() => {
     if (searchTerm.trim().length < 1) {
       setFilteredUsers([]);
@@ -18,11 +20,11 @@ const SearchBar = () => {
       const timer = setTimeout(() => {
         handleSearch();
       }, 400);
-
       return () => clearTimeout(timer);
     }
   }, [searchTerm]);
 
+  // Handle search query
   const handleSearch = async () => {
     try {
       setLoading(true);
@@ -50,39 +52,74 @@ const SearchBar = () => {
   };
 
   return (
-    <div className="flex flex-col items-center mt-8 w-full px-4">
-      <div className="relative w-full max-w-2xl mb-6">
-        <input
-          type="text"
-          placeholder="Search by username..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-5 py-3 pr-12 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 shadow-sm"
-        />
-        <svg
-          className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          />
-        </svg>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
+      {/* Header Section */}
+      <div className="bg-white/80 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-10 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <div className="bg-gradient-to-br from-[#4A7C8C] to-[#1D5464] p-2 rounded-lg shadow-md">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-slate-800">Search Users</h1>
+              <p className="text-slate-600 text-xs mt-0.5">
+                Find people by their username
+              </p>
+            </div>
+          </div>
+
+          <div className="relative w-full sm:w-96 mt-2 sm:mt-0">
+            <input
+              type="text"
+              placeholder="Search by username..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-5 py-2.5 pr-12 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#4A7C8C] shadow-sm text-sm transition-all"
+            />
+            <svg
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </div>
+        </div>
       </div>
 
-      {loading && (
-        <div className="flex items-center gap-2 text-gray-600">
-          <div className="w-5 h-5 border-3 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-          <p>Loading users...</p>
-        </div>
-      )}
+      {/* Loader */}
+    {/* Loader */}
+{loading && (
+  <div className="fixed inset-0 flex items-center justify-center bg-white/60 backdrop-blur-sm z-50">
+    <div className="flex flex-col items-center">
+      <div className="relative w-16 h-16">
+        {/* Outer rotating ring */}
+        <div className="absolute inset-0 border-4 border-t-transparent border-[#4A7C8C] rounded-full animate-spin"></div>
 
+        {/* Inner pulse circle */}
+        <div className="absolute inset-3 bg-gradient-to-r from-[#4A7C8C] to-[#1D5464] rounded-full animate-ping"></div>
+
+        {/* Center glow */}
+        <div className="absolute inset-5 bg-[#4A7C8C] rounded-full blur-[2px] opacity-70"></div>
+      </div>
+
+      <p className="mt-6 text-[#1D5464] font-semibold text-sm tracking-wide animate-pulse">
+        Loading users...
+      </p>
+    </div>
+  </div>
+)}
+
+
+      {/* Error */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2">
+        <div className="max-w-md mx-auto mt-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2 shadow-sm">
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
             <path
               fillRule="evenodd"
@@ -94,69 +131,60 @@ const SearchBar = () => {
         </div>
       )}
 
-      <div className="w-full max-w-2xl mt-6 space-y-3">
-        {filteredUsers.length > 0
-          ? filteredUsers.map((user) => (
+      {/* Results Grid */}
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {filteredUsers.length > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+            {filteredUsers.map((user) => (
               <div
                 key={user._id}
-                className="bg-white border border-gray-200 p-4 rounded-xl hover:shadow-lg hover:border-blue-300 transition-all duration-200 flex items-center gap-4 cursor-pointer group"
+                className="group bg-white rounded-xl shadow-md hover:shadow-lg border border-slate-100 hover:border-[#4A7C8C]/30 transition-all duration-300 overflow-hidden hover:-translate-y-1"
               >
-                <div className="relative">
-                  <img
-                    src={user.profilePic || "/assets/defaultpic.png"}
-                    alt={user.username}
-                    className="w-14 h-14 rounded-full object-cover border-2 border-gray-200 group-hover:border-blue-400 transition-colors duration-200"
-                  />
-                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
+                {/* Gradient Header */}
+                <div className="h-16 bg-gradient-to-br from-[#4A7C8C] to-[#1D5464] relative">
+                  <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2">
+                    <div className="relative">
+                      <img
+                        src={user.profilePic || defaultpic}
+                        alt={user.username}
+                        className="w-16 h-16 rounded-xl object-cover border-3 border-white shadow-lg"
+                      />
+                      <div className="absolute -bottom-0.5 -right-0.5 bg-green-500 w-4 h-4 rounded-full border-2 border-white"></div>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className="font-semibold text-gray-900 text-lg">
+
+                {/* Card Content */}
+                <div className="pt-10 px-3 pb-3 text-center">
+                  <h2 className="font-bold text-slate-800 text-sm mb-0.5 truncate group-hover:text-[#1D5464] transition-colors">
                     {user.name || "Unknown User"}
-                  </p>
-                  <p className="text-blue-600 text-sm font-medium">
+                  </h2>
+                  <p className="text-[#4A7C8C] text-xs font-medium truncate mb-1.5">
                     @{user.username}
                   </p>
-                  <p className="text-gray-500 text-xs mt-1">{user.email}</p>
+                  <p className="text-slate-600 text-xs line-clamp-2 leading-relaxed">
+                    {user.bio || "No bio available"}
+                  </p>
                 </div>
-                <svg
-                  className="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
               </div>
-            ))
-          : !loading &&
-            searchTerm.trim().length >= 3 && (
-              <div className="text-center py-12">
-                <svg
-                  className="w-16 h-16 text-gray-300 mx-auto mb-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                  />
-                </svg>
-                <p className="text-gray-500 text-lg font-medium">
-                  No users found
-                </p>
-                <p className="text-gray-400 text-sm mt-1">
-                  Try searching with a different username
-                </p>
+            ))}
+          </div>
+        ) : (
+          !loading &&
+          searchTerm.trim().length >= 3 && (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="bg-slate-100 rounded-full p-6 mb-4">
+                <Sparkles className="w-12 h-12 text-slate-400" />
               </div>
-            )}
+              <p className="text-slate-500 text-lg font-medium">
+                No users found
+              </p>
+              <p className="text-slate-400 text-sm mt-2">
+                Try searching with a different username
+              </p>
+            </div>
+          )
+        )}
       </div>
     </div>
   );
