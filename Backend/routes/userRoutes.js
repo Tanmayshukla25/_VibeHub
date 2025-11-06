@@ -9,6 +9,7 @@ import {
   getAllUsers,
   checkAuth,
   updateFullProfile,
+  getMyProfile,
 } from "../controllers/userControllers.js";
 import {
   sendVerificationCode,
@@ -16,7 +17,6 @@ import {
 } from "../controllers/verifyEmailController.js";
 import { uploadCloud } from "../middleware/cloudinaryUpload.js";
 import { verifyToken } from "../middleware/CheckToken.js";
-import { getMyProfile } from "../controllers/userControllers.js";
 
 const router = express.Router();
 
@@ -37,6 +37,9 @@ router.put(
 router.get("/:id", getUserById);
 router.put("/update/:id", uploadCloud.single("profilePic"), updateFullProfile);
 
+
 router.get("/me", verifyToken, getMyProfile);
 
+// ⚠️ Keep this LAST, always
+router.get("/:id", getUserById);
 export default router;

@@ -4,7 +4,7 @@ import Register from "./components/UserRegister";
 import Login from "./components/UserLogin";
 import AddDob from "./Pages/AddDob";
 import MailConfirm from "./Pages/MailConfirm";
-import CreateProfile from "./Pages/CreateProfile ";
+
 import HomePage from "./Pages/HomePage";
 import Explore from "./SideBarComponents/Explore";
 import FrontPage from "./SideBarComponents/FrontPage";
@@ -16,6 +16,7 @@ import Followers from "./Connections/Followers";
 import Post from "./Connections/post";
 import Following from "./Connections/following";
 import Notification from "./SideBarComponents/Notification";
+import CreateProfile from "./Pages/CreateProfile";
 
 const App = () => {
  

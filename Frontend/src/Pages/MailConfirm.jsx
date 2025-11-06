@@ -21,6 +21,8 @@ const MailConfirm = () => {
     if (storedEmail) setUserEmail(storedEmail);
   }, []);
 
+  
+  
   const handleOtpChange = (e, i) => {
     const v = e.target.value.replace(/[^0-9]/g, "");
     const newOtp = [...otpValues];
@@ -42,6 +44,7 @@ const MailConfirm = () => {
 
     try {
       setLoading(true);
+      console.log("userEmail",userEmail, "otp",confirmationCode);
       const res = await instance.post("/user/verify-code", { email: userEmail, code: confirmationCode });
       setMessage({ text: "✅ Verified successfully!", type: "success" });
       setTimeout(() => navigate("/profile", { state: { userId } }), 1200);

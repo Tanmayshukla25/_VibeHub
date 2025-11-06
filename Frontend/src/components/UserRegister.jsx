@@ -85,7 +85,9 @@ const Register = () => {
 
     if (name === "email") {
       if (value && !/^[\w.+-]+@gmail\.com$/.test(value)) {
-        setEmailError("Please enter a valid Gmail address (e.g., user@gmail.com)");
+        setEmailError(
+          "Please enter a valid Gmail address (e.g., user@gmail.com)"
+        );
       } else {
         setEmailError("");
       }
@@ -147,6 +149,8 @@ const Register = () => {
       const res = await instance.post("/user/register", formData);
       toast.success("Registration successful!");
       const userId = res.data?.user?.id || res.data?.id;
+      const email = formData.email;
+      localStorage.setItem("userEmail", email);
       setTimeout(() => {
         navigate("/Dob", { state: { userId } });
       }, 800);
@@ -233,7 +237,9 @@ const Register = () => {
               value={formData.email}
               className="w-full border border-slate-200 bg-slate-50 p-2 text-sm mb-1 rounded-lg focus:ring-2 focus:ring-[#4A7C8C] focus:border-[#4A7C8C] outline-none transition"
             />
-            {emailError && <p className="text-red-500 text-xs mb-2">{emailError}</p>}
+            {emailError && (
+              <p className="text-red-500 text-xs mb-2">{emailError}</p>
+            )}
 
             <div className="relative mb-2">
               <input
@@ -252,7 +258,9 @@ const Register = () => {
               </span>
             </div>
 
-            {passwordError && <p className="text-red-500 text-xs mt-1">{passwordError}</p>}
+            {passwordError && (
+              <p className="text-red-500 text-xs mt-1">{passwordError}</p>
+            )}
             {formData.password && (
               <div className="w-full mt-1 mb-2">
                 <div className="flex justify-between text-xs text-slate-600">
@@ -295,11 +303,15 @@ const Register = () => {
               </span>
             </div>
 
-            {confirmError && <p className="text-red-500 text-xs mt-1">{confirmError}</p>}
+            {confirmError && (
+              <p className="text-red-500 text-xs mt-1">{confirmError}</p>
+            )}
             {!confirmError &&
               formData.confirmPassword &&
               formData.password === formData.confirmPassword && (
-                <p className="text-green-500 text-xs mt-1">✅ Passwords match</p>
+                <p className="text-green-500 text-xs mt-1">
+                  ✅ Passwords match
+                </p>
               )}
 
             <button
