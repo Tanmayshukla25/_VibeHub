@@ -15,6 +15,7 @@ import SearchBar from "./SideBarComponents/searchBar";
 import Followers from "./Connections/Followers";
 import Post from "./Connections/post";
 import Following from "./Connections/following";
+import Notification from "./SideBarComponents/Notification";
 
 const App = () => {
  
@@ -46,6 +47,7 @@ const App = () => {
         { path: "/home/post", element: <Post/> },
         { path: "/home/following", element: <Following/> },
         { path: "/home/Followers", element: <Followers/> },
+        { path: "/home/Notification", element: <Notification/> },
       ],
     },
   ]);

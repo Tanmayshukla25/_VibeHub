@@ -16,6 +16,7 @@ import {
 } from "../controllers/verifyEmailController.js";
 import { uploadCloud } from "../middleware/cloudinaryUpload.js";
 import { verifyToken } from "../middleware/CheckToken.js";
+import { getMyProfile } from "../controllers/userControllers.js";
 
 const router = express.Router();
 
@@ -35,5 +36,7 @@ router.put(
 );
 router.get("/:id", getUserById);
 router.put("/update/:id", uploadCloud.single("profilePic"), updateFullProfile);
+
+router.get("/me", verifyToken, getMyProfile);
 
 export default router;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Sparkles } from "lucide-react";
 import instance from "../axiosConfig.js";
-import defaultpic from "../assets/Defaultpic.png";
+import defaultpic from "/Default.png";
 
 const SearchBar = () => {
   const [searchTerm, setSearchTerm] = useState("");

@@ -3,6 +3,7 @@ import { Camera, User } from "lucide-react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import VibeHubLogo from "../assets/VibeHub.png";
 import instance from "../axiosConfig";
+const Default = "/Default.png";
 
 const CreateProfile = () => {
   const [bio, setBio] = useState("");
@@ -20,7 +21,10 @@ const CreateProfile = () => {
       setUserId(id);
       console.log("✅ Received userId:", id);
     } else {
-      setMessage({ text: "User ID not found. Please register again.", type: "error" });
+      setMessage({
+        text: "User ID not found. Please register again.",
+        type: "error",
+      });
       setTimeout(() => navigate("/register"), 1500);
     }
   }, [location.state, navigate]);
@@ -35,6 +39,39 @@ const CreateProfile = () => {
   };
 
   // 📝 Submit Handler
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setMessage({ text: "", type: "" });
+
+  //   if (!userId) {
+  //     setMessage({ text: "User ID missing. Please try again.", type: "error" });
+  //     return;
+  //   }
+
+  //   const formData = new FormData();
+  //   formData.append("bio", bio);
+  //   if (profilePic) formData.append("profilePic", profilePic);
+
+  //   try {
+  //     setLoading(true);
+  //     const res = await instance.put(`/user/update-profile/${userId}`, formData, {
+  //       headers: { "Content-Type": "multipart/form-data" }, // ✅ critical for image upload
+  //     });
+
+  //     console.log("✅ Profile updated:", res.data.user);
+  //     setMessage({ text: "Profile updated successfully! 🎉", type: "success" });
+
+  //     setTimeout(() => navigate("/"), 1500);
+  //   } catch (err) {
+  //     console.error("❌ Error updating profile:", err);
+  //     setMessage({
+  //       text: err.response?.data?.message || "Failed to update profile.",
+  //       type: "error",
+  //     });
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage({ text: "", type: "" });
@@ -46,13 +83,24 @@ const CreateProfile = () => {
 
     const formData = new FormData();
     formData.append("bio", bio);
-    if (profilePic) formData.append("profilePic", profilePic);
+
+    // ✅ if user uploaded pic, send that; otherwise send default
+    if (profilePic) {
+      formData.append("profilePic", profilePic);
+    } else {
+      // Optional: assign a default image URL from your assets or a hosted path
+      formData.append("profilePic", Default); // imported at top
+    }
 
     try {
       setLoading(true);
-      const res = await instance.put(`/user/update-profile/${userId}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" }, // ✅ critical for image upload
-      });
+      const res = await instance.put(
+        `/user/update-profile/${userId}`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
 
       console.log("✅ Profile updated:", res.data.user);
       setMessage({ text: "Profile updated successfully! 🎉", type: "success" });
@@ -74,7 +122,11 @@ const CreateProfile = () => {
       {/* Logo */}
       <div className="absolute top-6 left-1/2 transform -translate-x-1/2">
         <Link to="/">
-          <img src={VibeHubLogo} alt="VibeHub Logo" className="w-28 sm:w-32 drop-shadow-lg" />
+          <img
+            src={VibeHubLogo}
+            alt="VibeHub Logo"
+            className="w-28 sm:w-32 drop-shadow-lg"
+          />
         </Link>
       </div>
 
@@ -83,34 +135,37 @@ const CreateProfile = () => {
         <h2 className="text-3xl font-bold mb-2 bg-gradient-to-r from-[#4A7C8C] to-[#1D5464] bg-clip-text text-transparent">
           Create Your Profile
         </h2>
-        <p className="text-slate-500 text-sm mb-6">Show the world your vibe ✨</p>
+        <p className="text-slate-500 text-sm mb-6">
+          Show the world your vibe ✨
+        </p>
 
         {/* Image Upload Section */}
-       <label
-  htmlFor="profilePic"
-  className="relative cursor-pointer block mx-auto w-32 h-32 rounded-full ring-4 ring-white shadow-md hover:scale-105 transition overflow-visible"
->
-  {/* Inner wrapper for rounded crop */}
-  <div className="w-full h-full rounded-full overflow-hidden">
-    {preview ? (
-      <img
-        src={preview}
-        alt="preview"
-        className="w-full h-full object-cover rounded-full"
-      />
-    ) : (
-      <div className="flex items-center justify-center w-full h-full bg-slate-100 rounded-full">
-        <User className="w-12 h-12 text-slate-400" />
-      </div>
-    )}
-  </div>
+        <label
+          htmlFor="profilePic"
+          className="relative cursor-pointer block mx-auto w-32 h-32 rounded-full ring-4 ring-white shadow-md hover:scale-105 transition overflow-visible"
+        >
+          {/* Inner wrapper for rounded crop */}
+          <div className="w-full h-full rounded-full overflow-hidden">
+            {preview ? (
+              <img
+                src={preview}
+                alt="preview"
+                className="w-full h-full object-cover rounded-full"
+              />
+            ) : (
+              <img
+                src={Default}
+                alt="default"
+                className="w-full h-full object-cover rounded-full"
+              />
+            )}
+          </div>
 
-  {/* Floating camera icon */}
-  <div className="absolute bottom-0 right-0 bg-gradient-to-r from-[#4A7C8C] to-[#1D5464] p-2.5 rounded-full shadow-md">
-    <Camera className="text-white w-4 h-4" />
-  </div>
-</label>
-
+          {/* Floating camera icon */}
+          <div className="absolute bottom-0 right-0 bg-gradient-to-r from-[#4A7C8C] to-[#1D5464] p-2.5 rounded-full shadow-md">
+            <Camera className="text-white w-4 h-4" />
+          </div>
+        </label>
 
         <input
           id="profilePic"

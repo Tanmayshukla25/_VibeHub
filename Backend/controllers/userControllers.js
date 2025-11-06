@@ -208,17 +208,29 @@ export const updateProfile = async (req, res) => {
     console.log("Bio:", bio);
     console.log("File object:", req.file);
 
+    // Step 1: Prepare update data
     const updatedData = {};
     if (bio !== undefined) updatedData.bio = bio;
+
     if (req.file) {
+      // ✅ Uploaded new image
       updatedData.profilePic = req.file.path || req.file.secure_url;
+    } else {
+      // ✅ No image uploaded — set a default image if missing
+      updatedData.profilePic =
+        "/Default.png"; // relative to frontend public folder or CDN
     }
 
+    // Step 2: Update user
     const user = await User.findByIdAndUpdate(id, updatedData, {
       new: true,
     }).select("email bio profilePic _id");
-    if (!user) return res.status(404).json({ message: "User not found" });
 
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Step 3: Send response
     res.status(200).json({
       message: "Profile updated successfully",
       user: {
@@ -230,11 +242,13 @@ export const updateProfile = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Error updating profile:", error);
-    res
-      .status(500)
-      .json({ message: "Internal server error", error: error.message });
+    res.status(500).json({
+      message: "Internal server error",
+      error: error.message,
+    });
   }
 };
+
 
 export const checkAuth = async (req, res) => {
   return res.status(200).json({
@@ -307,5 +321,19 @@ export const updateFullProfile = async (req, res) => {
     res
       .status(500)
       .json({ message: "Internal server error", error: error.message });
+  }
+};
+
+
+export const getMyProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const user = await UserAuth.findById(userId)
+      .populate("followers", "username name profilePic")
+      .populate("following", "username name profilePic");
+    res.status(200).json({ user });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error fetching user profile" });
   }
 };

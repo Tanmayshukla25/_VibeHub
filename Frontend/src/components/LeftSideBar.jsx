@@ -172,6 +172,7 @@ const Sidebar = () => {
               <span>Messages</span>
             </li>
 
+          <Link to="/home/Notification">
             <li
               onClick={() => setActive("Notifications")}
               className={`flex items-center gap-4 cursor-pointer px-3 py-2 my-1 rounded-xl transition-all duration-200 ${
@@ -183,6 +184,7 @@ const Sidebar = () => {
               <Heart size={24} />
               <span>Notifications</span>
             </li>
+            </Link>
 
             <li
               onClick={() => setActive("Create")}
