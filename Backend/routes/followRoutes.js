@@ -33,6 +33,8 @@ import {
   cancelFollowRequest,
   unfollowUser,
   getFollowStatus,
+  getMyFollowers,
+  getMyFollowing,
 } from "../controllers/followController.js";
 
 const router = express.Router();
@@ -44,5 +46,8 @@ router.get("/notifications", verifyToken, getFollowRequests);
 router.delete("/cancel/:receiverId", verifyToken, cancelFollowRequest);
 router.delete("/unfollow/:receiverId", verifyToken, unfollowUser);
 router.get("/status", verifyToken, getFollowStatus);
+
+router.get("/me/followers", verifyToken, getMyFollowers);
+router.get("/me/following", verifyToken, getMyFollowing);
 export default router;
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import instance from "../axiosConfig";
 import mail from "../assets/mail.png";
 import VibeHubLogo from "../assets/VibeHub.png";
@@ -46,7 +46,7 @@ const MailConfirm = () => {
       setLoading(true);
       console.log("userEmail",userEmail, "otp",confirmationCode);
       const res = await instance.post("/user/verify-code", { email: userEmail, code: confirmationCode });
-      setMessage({ text: "✅ Verified successfully!", type: "success" });
+      setMessage({ text: " Verified successfully!", type: "success" });
       setTimeout(() => navigate("/profile", { state: { userId } }), 1200);
     } catch {
       setMessage({ text: "Invalid verification code.", type: "error" });
@@ -65,6 +65,19 @@ const MailConfirm = () => {
         transition={{ duration: 0.6 }}
         className="bg-white rounded-2xl shadow-2xl border border-slate-100 p-8 w-full max-w-md text-center"
       >
+         <AnimatePresence>
+          {message.type === "success" && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.5 }}
+              transition={{ duration: 0.5 }}
+              className="absolute -top-10 left-1/2 transform -translate-x-1/2"
+            >
+              <CheckCheck />
+            </motion.div>
+          )}
+        </AnimatePresence>
         <img src={mail} alt="mail" className="w-20 mx-auto mb-3" />
         <h1 className="text-2xl font-semibold text-slate-800 mb-2">Confirm Your Email</h1>
         <p className="text-sm text-slate-600 mb-3">

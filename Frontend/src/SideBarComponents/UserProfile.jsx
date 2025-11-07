@@ -389,7 +389,7 @@ const UserProfile = () => {
                     onMouseLeave={() => setIsHovered(false)}
                     className="cursor-pointer"
                   >
-                    <div className="w-32 h-32 rounded-full bg-white p-1 shadow-2xl overflow-hidden transition-transform duration-300 group-hover:scale-105">
+                    <div className=" w-25 sm:w-32 h-25 sm:h-32 rounded-full bg-white p-1 shadow-2xl overflow-hidden transition-transform duration-300 group-hover:scale-105">
                       <img
                         src={preview || user?.profilePic || defaultPic}
                         alt="profile"
@@ -469,7 +469,7 @@ const UserProfile = () => {
                   )}
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-10 sm:pt-8 mb-3 border-slate-200">
+              <div className="grid grid-cols-3 gap-10 sm:pt-8 mb-3 pt-3 border-slate-200">
                 <Link to="/home/post" className="group">
                   <div className="text-center sm:p-4 rounded-xl bg-slate-50 hover:bg-gradient-to-br hover:from-[#4A7C8C]/10 hover:to-[#1D5464]/10 transition-all border border-slate-100 hover:border-[#4A7C8C]/30">
                     <p className="sm:text-2xl font-bold text-slate-800 group-hover:text-[#1D5464] transition">

@@ -147,7 +147,7 @@ const SearchBar = () => {
                       <img
                         src={user.profilePic || defaultpic}
                         alt={user.username}
-                        className="w-16 h-16 rounded-xl object-cover border-3 border-white shadow-lg"
+                        className="w-16 h-16 rounded-full bg-white object-cover border-3 border-white shadow-lg"
                       />
                       <div className="absolute -bottom-0.5 -right-0.5 bg-green-500 w-4 h-4 rounded-full border-2 border-white"></div>
                     </div>
