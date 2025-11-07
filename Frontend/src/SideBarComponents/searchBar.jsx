@@ -2,12 +2,16 @@ import React, { useState, useEffect } from "react";
 import { Sparkles } from "lucide-react";
 import instance from "../axiosConfig.js";
 import defaultpic from "/Default.png";
+import { useNavigate } from "react-router-dom";
+import { ChevronsRight } from "../components/ChevronsRight"; // ✅ animated icon
 
 const SearchBar = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const navigate = useNavigate();
 
   // Debounced search effect
   useEffect(() => {
@@ -61,7 +65,9 @@ const SearchBar = () => {
               <Sparkles className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-slate-800">Search Users</h1>
+              <h1 className="text-2xl font-bold text-slate-800">
+                Search Users
+              </h1>
               <p className="text-slate-600 text-xs mt-0.5">
                 Find people by their username
               </p>
@@ -94,28 +100,23 @@ const SearchBar = () => {
       </div>
 
       {/* Loader */}
-    {/* Loader */}
-{loading && (
-  <div className="fixed inset-0 flex items-center justify-center bg-white/60 backdrop-blur-sm z-50">
-    <div className="flex flex-col items-center">
-      <div className="relative w-16 h-16">
-        {/* Outer rotating ring */}
-        <div className="absolute inset-0 border-4 border-t-transparent border-[#4A7C8C] rounded-full animate-spin"></div>
+      {loading && (
+        <div className="fixed inset-0 flex items-center justify-center bg-white/60 backdrop-blur-sm z-50">
+          <div className="relative w-20 h-20">
+            {/* Outer ring */}
+            <div className="absolute inset-0 border-4 border-t-transparent border-[#4A7C8C] rounded-full animate-spin"></div>
 
-        {/* Inner pulse circle */}
-        <div className="absolute inset-3 bg-gradient-to-r from-[#4A7C8C] to-[#1D5464] rounded-full animate-ping"></div>
+            {/* Middle glowing circle */}
+            <div className="absolute inset-3 bg-gradient-to-r from-[#4A7C8C] to-[#1D5464] rounded-full blur-md animate-pulse"></div>
 
-        {/* Center glow */}
-        <div className="absolute inset-5 bg-[#4A7C8C] rounded-full blur-[2px] opacity-70"></div>
-      </div>
+            {/* Subtle inner highlight */}
+            <div className="absolute inset-5 bg-[#4A7C8C] rounded-full blur-[3px] opacity-60"></div>
 
-      <p className="mt-6 text-[#1D5464] font-semibold text-sm tracking-wide animate-pulse">
-        Loading users...
-      </p>
-    </div>
-  </div>
-)}
-
+            {/* Center shimmer */}
+            <div className="absolute inset-7 bg-[#1D5464] rounded-full animate-ping opacity-50"></div>
+          </div>
+        </div>
+      )}
 
       {/* Error */}
       {error && (
@@ -138,18 +139,21 @@ const SearchBar = () => {
             {filteredUsers.map((user) => (
               <div
                 key={user._id}
-                className="group bg-white rounded-xl shadow-md hover:shadow-lg border border-slate-100 hover:border-[#4A7C8C]/30 transition-all duration-300 overflow-hidden hover:-translate-y-1"
+                className="group bg-white rounded-xl shadow-md hover:shadow-lg border border-slate-100 hover:border-[#4A7C8C]/30 transition-all duration-300 overflow-hidden hover:-translate-y-1 relative"
               >
                 {/* Gradient Header */}
-                <div className="h-16 bg-gradient-to-br from-[#4A7C8C] to-[#1D5464] relative">
+                <div className="h-20 bg-gradient-to-br from-[#4A7C8C] to-[#1D5464] relative">
+                  {/* ✅ Check Profile Button (top-right) */}
+                 
+
+                  {/* Profile Picture */}
                   <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2">
                     <div className="relative">
                       <img
                         src={user.profilePic || defaultpic}
                         alt={user.username}
-                        className="w-16 h-16 rounded-full bg-white object-cover border-3 border-white shadow-lg"
+                        className="w-16 h-16 rounded-full bg-white object-cover border-4 border-white shadow-lg"
                       />
-                      <div className="absolute -bottom-0.5 -right-0.5 bg-green-500 w-4 h-4 rounded-full border-2 border-white"></div>
                     </div>
                   </div>
                 </div>
@@ -165,6 +169,14 @@ const SearchBar = () => {
                   <p className="text-slate-600 text-xs line-clamp-2 leading-relaxed">
                     {user.bio || "No bio available"}
                   </p>
+
+                   <div
+                    onClick={() => navigate(`/home/checkprofile/${user._id}`)}
+                    className=" flex bg-gradient-to-r from-[#4A7C8C] to-[#1D5464]  items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg bg-white/20 backdrop-blur-sm border border-white/30 hover:bg-white/30 text-white text-[15px] font-medium cursor-pointer transition-all hover:scale-100"
+                  >
+                    <span>View</span>
+                    <ChevronsRight stroke="#ffffff" width={20} height={20} />
+                  </div>
                 </div>
               </div>
             ))}

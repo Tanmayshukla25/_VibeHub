@@ -240,3 +240,45 @@ export const getMyFollowing = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+
+
+export const getFollowersById = async (req, res) => {
+  try {
+    const { id } = req.params; // user ID from URL
+
+    const user = await UserAuth.findById(id)
+      .populate("followers", "name username profilePic bio")
+      .select("followers");
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    return res.status(200).json({
+      count: user.followers.length,
+      followers: user.followers,
+    });
+  } catch (error) {
+    console.error("Error fetching followers by ID:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+export const getFollowingById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const user = await UserAuth.findById(id)
+      .populate("following", "name username profilePic bio")
+      .select("following");
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    return res.status(200).json({
+      count: user.following.length,
+      following: user.following,
+    });
+  } catch (error) {
+    console.error("Error fetching following by ID:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};

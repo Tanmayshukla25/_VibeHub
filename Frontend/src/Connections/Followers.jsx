@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext } from "react";
 import { ArrowLeft, UserPlus, UserCheck, Clock } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import instance from "../axiosConfig";
 import defaultPic from "../assets/Defalutpic.png";
 import { UserContext } from "../UserContext";
@@ -10,11 +10,13 @@ const Followers = () => {
   const [followStatus, setFollowStatus] = useState({});
   const [loadingId, setLoadingId] = useState(null);
   const [loggedInUserId, setLoggedInUserId] = useState(null);
+  const [profileOwner, setProfileOwner] = useState(null);
   const navigate = useNavigate();
+  const { id } = useParams(); // ✅ if viewing another user's profile
   const userCtx = useContext(UserContext);
   const globalFetchNotifications = userCtx?.fetchNotifications;
 
-  // ✅ Get logged-in user info
+  // ✅ Fetch logged-in user
   useEffect(() => {
     const fetchLoggedInUser = async () => {
       try {
@@ -29,11 +31,15 @@ const Followers = () => {
     fetchLoggedInUser();
   }, []);
 
-  // ✅ Fetch followers
+  // ✅ Fetch followers (own or other user’s)
   useEffect(() => {
     const fetchFollowers = async () => {
       try {
-        const { data } = await instance.get("/follow/me/followers", {
+        const endpoint = id
+          ? `/follow/${id}/followers`
+          : "/follow/me/followers"; // 🔄 dynamic
+
+        const { data } = await instance.get(endpoint, {
           withCredentials: true,
         });
         setFollowers(data.followers || []);
@@ -41,10 +47,11 @@ const Followers = () => {
         console.error("Error fetching followers:", error);
       }
     };
-    fetchFollowers();
-  }, []);
 
-  // ✅ Fetch current follow status
+    fetchFollowers();
+  }, [id]);
+
+  // ✅ Fetch follow status
   useEffect(() => {
     const fetchFollowStatus = async () => {
       try {
@@ -53,8 +60,8 @@ const Followers = () => {
         });
         const { following = [], requested = [] } = res.data;
         const statusObj = {};
-        following.forEach((id) => (statusObj[id] = "following"));
-        requested.forEach((id) => (statusObj[id] = "requested"));
+        following.forEach((uid) => (statusObj[uid] = "following"));
+        requested.forEach((uid) => (statusObj[uid] = "requested"));
         setFollowStatus(statusObj);
         if (globalFetchNotifications) globalFetchNotifications();
       } catch (err) {
@@ -64,7 +71,7 @@ const Followers = () => {
     fetchFollowStatus();
   }, []);
 
-  // ✅ Follow / Unfollow / Cancel handler
+  // ✅ Handle Follow / Unfollow
   const handleFollowAction = async (receiverId) => {
     try {
       setLoadingId(receiverId);
@@ -86,7 +93,6 @@ const Followers = () => {
           {},
           { withCredentials: true }
         );
-
         const msg = res.data.message;
         if (msg.includes("accepted") || msg.includes("mutual")) {
           setFollowStatus((prev) => ({ ...prev, [receiverId]: "following" }));
@@ -113,7 +119,9 @@ const Followers = () => {
         >
           <ArrowLeft className="w-5 h-5 text-slate-700" />
         </button>
-        <h2 className="text-xl font-semibold text-slate-800">Followers</h2>
+        <h2 className="text-xl font-semibold text-slate-800">
+          {id ? "Followers" : "Your Followers"}
+        </h2>
       </div>
 
       {/* Followers List */}
@@ -122,31 +130,37 @@ const Followers = () => {
           {followers.map((user) => (
             <div
               key={user._id}
-              className="flex items-center justify-between bg-white p-3 rounded-2xl shadow-sm hover:shadow-md transition"
+              className="flex items-center justify-between bg-white p-3 rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-1 border border-slate-100 transition-all cursor-pointer"
+              onClick={() => navigate(`/home/checkprofile/${user._id}`)} // ✅ open their profile
             >
               <div className="flex items-center gap-3">
                 <img
                   src={user.profilePic || defaultPic}
                   alt={user.name}
-                  className="w-12 h-12 rounded-full object-cover border border-slate-200"
+                  className="w-12 h-12 rounded-full object-cover border border-slate-200 hover:ring-2 hover:ring-[#4A7C8C] transition"
                 />
                 <div>
-                  <p className="font-medium text-slate-800">{user.name}</p>
+                  <p className="font-semibold text-slate-800 hover:text-[#1D5464] transition-colors">
+                    {user.name}
+                  </p>
                   <p className="text-sm text-slate-500">@{user.username}</p>
                 </div>
               </div>
 
-              {/* Button */}
+              {/* Follow Button */}
               {loggedInUserId !== user._id && (
                 <button
                   disabled={loadingId === user._id}
-                  onClick={() => handleFollowAction(user._id)}
+                  onClick={(e) => {
+                    e.stopPropagation(); // prevent profile click
+                    handleFollowAction(user._id);
+                  }}
                   className={`px-4 py-1.5 rounded-full font-semibold text-xs transition-all flex items-center gap-1.5 ${
                     followStatus[user._id] === "following"
                       ? "bg-slate-100 text-slate-700 hover:bg-red-50 hover:text-red-500"
                       : followStatus[user._id] === "requested"
                       ? "bg-yellow-100 text-yellow-700"
-                      : "bg-gradient-to-r from-[#4A7C8C] to-[#1D5464] text-white hover:shadow-lg hover:scale-[1.02]"
+                      : "bg-gradient-to-r from-[#4A7C8C] to-[#1D5464] text-white hover:shadow-lg hover:scale-[1.03]"
                   }`}
                 >
                   {loadingId === user._id ? (
@@ -175,9 +189,18 @@ const Followers = () => {
           ))}
         </div>
       ) : (
-        <p className="text-center text-slate-500">
-          You don’t have any followers yet.
-        </p>
+        <div className="flex flex-col items-center justify-center mt-20 text-center">
+          <img
+            src={defaultPic}
+            alt="No followers"
+            className="w-20 h-20 rounded-full mb-4 opacity-60"
+          />
+          <p className="text-slate-500 text-lg font-medium">
+            {id
+              ? "This user doesn’t have any followers yet."
+              : "You don’t have any followers yet."}
+          </p>
+        </div>
       )}
     </div>
   );

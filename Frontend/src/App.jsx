@@ -10,7 +10,7 @@
 // import FrontPage from "./SideBarComponents/FrontPage";
 // import ProtectedRoute from "./ProtectedRoute";
 // import UserProfile from "./SideBarComponents/UserProfile";
-// import { UserContext } from "./UserContext"; 
+// import { UserContext } from "./UserContext";
 // import SearchBar from "./SideBarComponents/searchBar";
 // import Followers from "./Connections/Followers";
 // import Post from "./Connections/post";
@@ -19,13 +19,12 @@
 // import CreateProfile from "./Pages/CreateProfile";
 
 // const App = () => {
- 
+
 //    const [auth, setAuth] = useState({
 //     isAuthenticated: false,
 //     user: null,
 //   });
 
-  
 //   const router = createBrowserRouter([
 //     { path: "/", element: <Login /> },
 //     { path: "/register", element: <Register /> },
@@ -62,7 +61,6 @@
 
 // export default App;
 
-
 import React from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Register from "./components/UserRegister";
@@ -83,6 +81,10 @@ import CreateProfile from "./Pages/CreateProfile";
 
 // ✅ Import the UserProvider
 import { UserProvider } from "./UserContext";
+import CheckProfile from "./SideBarComponents/CheckProfile";
+import ChatRoom from "./SideBarComponents/ChatRoom";
+import ChatList from "./SideBarComponents/ChatList";
+import MessagesPage from "./SideBarComponents/MessagesPage";
 
 const App = () => {
   const router = createBrowserRouter([
@@ -106,8 +108,14 @@ const App = () => {
         { path: "/home/SearchBar", element: <SearchBar /> },
         { path: "/home/post", element: <Post /> },
         { path: "/home/following", element: <Following /> },
+        { path: "/home/following/:id", element: <Following /> },
         { path: "/home/Followers", element: <Followers /> },
+        { path: "/home/followers/:id", element: <Followers /> },
         { path: "/home/Notification", element: <Notification /> },
+        { path: "/home/CheckProfile/:id", element: <CheckProfile /> },
+        { path: "/home/messages", element: <MessagesPage /> },
+        { path: "/home/chat/:conversationId", element: <ChatRoom /> },
+        { path: "/home/ChatList", element: <ChatList /> },
       ],
     },
   ]);

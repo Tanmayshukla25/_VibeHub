@@ -16,8 +16,8 @@ import instance from "../axiosConfig";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import VibeHubLogo from "../assets/VibeHub.png";
 import defaultPic from "../assets/Defalutpic.png";
-import { BellRing } from "../components/BellRing"; 
-
+import { BellRing } from "../components/BellRing";
+import { BsChatDots } from "react-icons/bs";
 const Sidebar = () => {
   const [active, setActive] = useState("Home");
   const [showMore, setShowMore] = useState(false);
@@ -27,10 +27,8 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
- 
   const bellControls = useAnimation();
 
- 
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -49,7 +47,6 @@ const Sidebar = () => {
     fetchUser();
   }, []);
 
-
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
@@ -59,7 +56,6 @@ const Sidebar = () => {
         const count = res.data.requests?.length || 0;
 
         if (count > pendingCount) {
-         
           bellControls.start("animate");
           setTimeout(() => bellControls.start("normal"), 1000);
         }
@@ -75,14 +71,13 @@ const Sidebar = () => {
     const handleFollowUpdate = () => fetchNotifications();
     window.addEventListener("followUpdate", handleFollowUpdate);
 
-    const interval = setInterval(fetchNotifications, 60000); 
+    const interval = setInterval(fetchNotifications, 60000);
 
     return () => {
       clearInterval(interval);
       window.removeEventListener("followUpdate", handleFollowUpdate);
     };
   }, [pendingCount]);
-
 
   const handleLogout = async () => {
     try {
@@ -106,7 +101,6 @@ const Sidebar = () => {
 
   return (
     <>
-   
       <AnimatePresence>
         {message && (
           <>
@@ -134,7 +128,6 @@ const Sidebar = () => {
         )}
       </AnimatePresence>
 
-     
       <div className="hidden md:flex h-screen w-[250px] border-r border-gray-200 flex-col justify-between fixed bg-[#719FB0]">
         <div>
           <div className="w-[210px] h-[130px]">
@@ -196,23 +189,38 @@ const Sidebar = () => {
               <span>Reels</span>
             </li>
 
-            <li
-              onClick={() => setActive("Messages")}
-              className={`flex items-center gap-4 px-3 py-2 rounded-xl transition-all duration-200 cursor-pointer ${
-                active === "Messages"
-                  ? "bg-gray-100 font-semibold"
-                  : "hover:bg-gray-100"
-              }`}
-            >
-              <Send size={24} />
-              <span>Messages</span>
-            </li>
+            <Link to="/home/messages">
+              <li
+                onClick={() => setActive("Messages")}
+                className={`flex items-center gap-4 px-3 py-2 rounded-xl cursor-pointer ${
+                  active === "Messages"
+                    ? "bg-gray-100 font-semibold"
+                    : "hover:bg-gray-100"
+                }`}
+              >
+                <Send size={24} />
+                <span>Messages</span>
+              </li>
+            </Link>
 
-          
+            <Link to="/home/ChatList">
+              <li
+                onClick={() => setActive("ChatList")}
+                className={`flex items-center gap-4 mt-2 px-3 py-2 rounded-xl cursor-pointer ${
+                  active === "ChatList"
+                    ? "bg-gray-100 font-semibold"
+                    : "hover:bg-gray-100"
+                }`}
+              >
+                <BsChatDots size={28} />
+                <span>ChatList</span>
+              </li>
+            </Link>
+
             <Link to="/home/Notification">
               <li
                 onClick={() => setActive("Notification")}
-                className={`relative flex items-center gap-4 mt-2 px-1 py-1 rounded-xl transition-all duration-200 cursor-pointer ${
+                className={`relative flex items-center gap-4 mt-2 px-2 py-1 rounded-xl transition-all duration-200 cursor-pointer ${
                   active === "Notification"
                     ? "bg-gray-100 font-semibold"
                     : "hover:bg-gray-100"
@@ -261,7 +269,6 @@ const Sidebar = () => {
           </ul>
         </div>
 
-       
         <div className="relative px-4 py-4 space-y-2">
           <AnimatePresence>
             {showMore && (
@@ -289,7 +296,6 @@ const Sidebar = () => {
         </div>
       </div>
 
-    
       {location.pathname === "/home" && (
         <div className="fixed top-0 left-0 right-0 z-30 flex justify-between items-center bg-[#719FB0] border-b border-gray-300 shadow-sm px-4 py-3 md:hidden">
           <img src={VibeHubLogo} alt="VibeHub Logo" className="w-20" />
@@ -307,104 +313,104 @@ const Sidebar = () => {
                 </span>
               )}
             </Link>
-            <Send size={22} className="cursor-pointer hover:text-gray-600" />
+            <Link to="/home/messages">
+              <Send size={22} className="cursor-pointer hover:text-gray-600" />
+            </Link>
           </div>
         </div>
       )}
 
       {/* 🔹 Mobile Bottom Navbar */}
-    {/* 🔹 Mobile Bottom Navbar */}
-<div className="fixed bottom-0 left-0 right-0 z-40 flex md:hidden justify-around items-center bg-[#719FB0] py-3 border-t border-gray-300 shadow-lg">
-  <Link to="/home" onClick={() => setActive("Home")}>
-    <div
-      className={`p-2 rounded-full transition-all duration-200 ${
-        active === "Home"
-          ? "border-2 border-black bg-white/30"
-          : "border-2 border-transparent"
-      }`}
-    >
-      <Home
-        size={26}
-        className={`${
-          active === "Home" ? "text-black" : "text-gray-600"
-        } transition-colors`}
-      />
-    </div>
-  </Link>
+      {/* 🔹 Mobile Bottom Navbar */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 flex md:hidden justify-around items-center bg-[#719FB0] py-3 border-t border-gray-300 shadow-lg">
+        <Link to="/home" onClick={() => setActive("Home")}>
+          <div
+            className={`p-2 rounded-full transition-all duration-200 ${
+              active === "Home"
+                ? "border-2 border-black bg-white/30"
+                : "border-2 border-transparent"
+            }`}
+          >
+            <Home
+              size={26}
+              className={`${
+                active === "Home" ? "text-black" : "text-gray-600"
+              } transition-colors`}
+            />
+          </div>
+        </Link>
 
-  <Link to="/home/SearchBar" onClick={() => setActive("Search")}>
-    <div
-      className={`p-2 rounded-full transition-all duration-200 ${
-        active === "Search"
-          ? "border-2 border-black bg-white/30"
-          : "border-2 border-transparent"
-      }`}
-    >
-      <Search
-        size={26}
-        className={`${
-          active === "Search" ? "text-black" : "text-gray-600"
-        } transition-colors`}
-      />
-    </div>
-  </Link>
+        <Link to="/home/SearchBar" onClick={() => setActive("Search")}>
+          <div
+            className={`p-2 rounded-full transition-all duration-200 ${
+              active === "Search"
+                ? "border-2 border-black bg-white/30"
+                : "border-2 border-transparent"
+            }`}
+          >
+            <Search
+              size={26}
+              className={`${
+                active === "Search" ? "text-black" : "text-gray-600"
+              } transition-colors`}
+            />
+          </div>
+        </Link>
 
-  <Link to="/home/explore" onClick={() => setActive("Explore")}>
-    <div
-      className={`p-2 rounded-full transition-all duration-200 ${
-        active === "Explore"
-          ? "border-2 border-black bg-white/30"
-          : "border-2 border-transparent"
-      }`}
-    >
-      <Compass
-        size={26}
-        className={`${
-          active === "Explore"
-            ? "text-black scale-110"
-            : "text-gray-600"
-        } transition-transform transition-colors`}
-      />
-    </div>
-  </Link>
+        <Link to="/home/explore" onClick={() => setActive("Explore")}>
+          <div
+            className={`p-2 rounded-full transition-all duration-200 ${
+              active === "Explore"
+                ? "border-2 border-black bg-white/30"
+                : "border-2 border-transparent"
+            }`}
+          >
+            <Compass
+              size={26}
+              className={`${
+                active === "Explore" ? "text-black scale-110" : "text-gray-600"
+              } transition-transform transition-colors`}
+            />
+          </div>
+        </Link>
 
-  <div
-    onClick={() => setActive("Reels")}
-    className={`p-2 rounded-full transition-all duration-200 ${
-      active === "Reels"
-        ? "border-2 border-black bg-white/30"
-        : "border-2 border-transparent"
-    }`}
-  >
-    <Clapperboard
-      size={26}
-      className={`${
-        active === "Reels" ? "text-black" : "text-gray-600"
-      } transition-colors`}
-    />
-  </div>
+        <Link to="/home/ChatList" onClick={() => setActive("ChatList")}>
+          <div
+            className={`p-2 rounded-full transition-all duration-200 ${
+              active === "ChatList"
+                ? "border-2 border-black bg-white/30"
+                : "border-2 border-transparent"
+            }`}
+          >
+            <BsChatDots
+              size={26}
+              className={`${
+                active === "ChatList" ? "text-black" : "text-gray-600"
+              } transition-colors`}
+            />
+          </div>
+        </Link>
 
-  <Link to="/home/UserProfile" onClick={() => setActive("Profile")}>
-    <div
-      className={`p-1 rounded-full transition-all duration-200 ${
-        active === "Profile"
-          ? "border-2 border-black bg-white/30"
-          : "border-2 border-transparent"
-      }`}
-    >
-      <img
-        src={user?.profilePic || defaultPic}
-        alt="profile"
-        className={`w-8 h-8 rounded-full object-cover transition-all ${
-          active === "Profile"
-            ? "ring-1 ring-black scale-110"
-            : "opacity-80"
-        }`}
-      />
-    </div>
-  </Link>
-</div>
-
+        <Link to="/home/UserProfile" onClick={() => setActive("Profile")}>
+          <div
+            className={`p-1 rounded-full transition-all duration-200 ${
+              active === "Profile"
+                ? "border-2 border-black bg-white/30"
+                : "border-2 border-transparent"
+            }`}
+          >
+            <img
+              src={user?.profilePic || defaultPic}
+              alt="profile"
+              className={`w-8 h-8 rounded-full object-cover transition-all ${
+                active === "Profile"
+                  ? "ring-1 ring-black scale-110"
+                  : "opacity-80"
+              }`}
+            />
+          </div>
+        </Link>
+      </div>
     </>
   );
 };

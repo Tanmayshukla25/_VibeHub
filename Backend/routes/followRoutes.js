@@ -35,6 +35,8 @@ import {
   getFollowStatus,
   getMyFollowers,
   getMyFollowing,
+  getFollowersById,
+  getFollowingById,
 } from "../controllers/followController.js";
 
 const router = express.Router();
@@ -49,5 +51,8 @@ router.get("/status", verifyToken, getFollowStatus);
 
 router.get("/me/followers", verifyToken, getMyFollowers);
 router.get("/me/following", verifyToken, getMyFollowing);
+
+router.get("/:id/followers", verifyToken, getFollowersById);
+router.get("/:id/following", verifyToken, getFollowingById);
 export default router;
 

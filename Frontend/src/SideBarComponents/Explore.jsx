@@ -1,9 +1,10 @@
-
 import React, { useState, useEffect, useContext } from "react";
 import { UserPlus, UserCheck, Clock, Sparkles } from "lucide-react";
 import instance from "../axiosConfig";
 import defaultpic from "../assets/Defalutpic.png";
 import { UserContext } from "../UserContext";
+import { useNavigate } from "react-router-dom";
+import { ChevronsRight } from "../components/ChevronsRight";
 
 const Explore = () => {
   const [getAllUsers, setGetAllUsers] = useState([]);
@@ -11,25 +12,21 @@ const Explore = () => {
   const [loggedInUserId, setLoggedInUserId] = useState(null);
   const [loadingId, setLoadingId] = useState(null);
 
- 
+  const navigate = useNavigate();
   const userCtx = useContext(UserContext);
   const globalFetchNotifications = userCtx?.fetchNotifications;
 
- 
   const fetchNotifications = async () => {
     try {
       const res = await instance.get("/follow/notifications", {
         withCredentials: true,
       });
-      console.log("Fetched notifications (local):", res.data.requests?.length);
-    
       if (globalFetchNotifications) globalFetchNotifications();
     } catch (err) {
       console.error("Error fetching notifications (local):", err);
     }
   };
 
- 
   useEffect(() => {
     const fetchLoggedInUser = async () => {
       try {
@@ -44,7 +41,6 @@ const Explore = () => {
     fetchLoggedInUser();
   }, []);
 
-  
   useEffect(() => {
     const fetchAllUsers = async () => {
       try {
@@ -59,7 +55,6 @@ const Explore = () => {
     fetchAllUsers();
   }, []);
 
-
   useEffect(() => {
     const fetchFollowData = async () => {
       try {
@@ -72,7 +67,6 @@ const Explore = () => {
         following.forEach((id) => (statusObj[id] = "following"));
         requested.forEach((id) => (statusObj[id] = "requested"));
         fetchNotifications();
-
         setFollowStatus(statusObj);
       } catch (err) {
         console.log("Error fetching follow status:", err);
@@ -81,65 +75,36 @@ const Explore = () => {
     if (loggedInUserId) fetchFollowData();
   }, [loggedInUserId]);
 
-
   const handleFollowAction = async (receiverId) => {
     try {
       setLoadingId(receiverId);
       const currentStatus = followStatus[receiverId];
 
       if (currentStatus === "following") {
-       
         await instance.delete(`/follow/unfollow/${receiverId}`, {
           withCredentials: true,
         });
         setFollowStatus((prev) => ({ ...prev, [receiverId]: null }));
         fetchNotifications();
       } else if (currentStatus === "requested") {
-     
         await instance.delete(`/follow/cancel/${receiverId}`, {
           withCredentials: true,
         });
         setFollowStatus((prev) => ({ ...prev, [receiverId]: null }));
         fetchNotifications();
       } else {
-      
-        try {
-          const res = await instance.post(
-            `/follow/send/${receiverId}`,
-            {},
-            { withCredentials: true }
-          );
-
-          const message = res.data.message;
-
-          if (message.includes("accepted") || message.includes("mutual")) {
-          
-            setFollowStatus((prev) => ({ ...prev, [receiverId]: "following" }));
-          } else {
-         
-            setFollowStatus((prev) => ({ ...prev, [receiverId]: "requested" }));
-          }
-
-          fetchNotifications();
-        } catch (error) {
-          if (error.response?.status === 400) {
-            const msg = error.response.data?.message;
-            console.log("Follow skipped:", msg);
-            if (msg.includes("already follow")) {
-              setFollowStatus((prev) => ({
-                ...prev,
-                [receiverId]: "following",
-              }));
-            } else if (msg.includes("already sent")) {
-              setFollowStatus((prev) => ({
-                ...prev,
-                [receiverId]: "requested",
-              }));
-            }
-          } else {
-            console.error("Error sending follow request:", error);
-          }
+        const res = await instance.post(
+          `/follow/send/${receiverId}`,
+          {},
+          { withCredentials: true }
+        );
+        const message = res.data.message;
+        if (message.includes("accepted") || message.includes("mutual")) {
+          setFollowStatus((prev) => ({ ...prev, [receiverId]: "following" }));
+        } else {
+          setFollowStatus((prev) => ({ ...prev, [receiverId]: "requested" }));
         }
+        fetchNotifications();
       }
     } catch (error) {
       console.error("Error updating follow status:", error);
@@ -148,14 +113,13 @@ const Explore = () => {
     }
   };
 
- 
   const filteredUsers = getAllUsers.filter(
     (user) => user._id !== loggedInUserId
   );
 
   return (
     <div className="pb-15 min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
-    
+      {/* Header */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-10 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center gap-2">
@@ -174,17 +138,27 @@ const Explore = () => {
         </div>
       </div>
 
-     
+      {/* Users Grid */}
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {filteredUsers.length > 0 ? (
             filteredUsers.map((user) => (
               <div
                 key={user._id}
-                className="group bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden border border-slate-100 hover:border-[#4A7C8C]/30 hover:-translate-y-1"
+                className="group bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden border border-slate-100 hover:border-[#4A7C8C]/30 hover:-translate-y-1 relative"
               >
-              
-                <div className="h-16 bg-gradient-to-br from-[#4A7C8C] to-[#1D5464] relative">
+                {/* Top Section */}
+                <div className="h-20 bg-gradient-to-br from-[#4A7C8C] to-[#1D5464] relative">
+                  {/* ✅ Check Profile Button (Top-Right) */}
+                  <div
+                    onClick={() => navigate(`/home/checkprofile/${user._id}`)}
+                    className="absolute top-2 right-2 flex items-center sm:gap-1 px-1 sm:px-2.5 sm:py-1.5 rounded-lg bg-white/20 backdrop-blur-sm border border-white/30 hover:bg-white/30 text-white text-[11px] font-medium cursor-pointer transition-all hover:scale-105"
+                  >
+                    <span>View</span>
+                    <ChevronsRight stroke="#ffffff" width={20} height={20} />
+                  </div>
+
+                  {/* Profile Picture */}
                   <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2">
                     <img
                       src={user.profilePic || defaultpic}
@@ -194,7 +168,7 @@ const Explore = () => {
                   </div>
                 </div>
 
-            
+                {/* Info Section */}
                 <div className="pt-10 px-3 pb-3 text-center">
                   <h2 className="font-bold text-slate-800 text-sm mb-0.5 truncate">
                     {user.name}
@@ -214,7 +188,7 @@ const Explore = () => {
                       : "No bio available"}
                   </p>
 
-                 
+                  {/* Follow / Unfollow Button */}
                   <button
                     disabled={loadingId === user._id}
                     onClick={() => handleFollowAction(user._id)}
