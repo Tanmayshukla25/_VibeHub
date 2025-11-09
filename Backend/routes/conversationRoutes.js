@@ -3,6 +3,7 @@ import Conversation from "../models/Conversation.js";
 
 const router = express.Router();
 
+// ✅ Start or get an existing conversation
 router.post("/start", async (req, res) => {
   try {
     const { senderId, receiverId } = req.body;
@@ -17,7 +18,6 @@ router.post("/start", async (req, res) => {
       .populate("participants", "username name profilePic")
       .populate("messages.sender", "username name profilePic");
 
-    // ✅ If not found, create a new one
     if (!conversation) {
       conversation = new Conversation({
         participants: [senderId, receiverId],
@@ -29,7 +29,9 @@ router.post("/start", async (req, res) => {
     res.status(200).json(conversation);
   } catch (error) {
     console.error("❌ Error starting chat:", error);
-    res.status(500).json({ message: "Error starting chat", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error starting chat", error: error.message });
   }
 });
 
@@ -37,6 +39,7 @@ router.post("/start", async (req, res) => {
 router.get("/:conversationId", async (req, res) => {
   try {
     const { conversationId } = req.params;
+
     const conversation = await Conversation.findById(conversationId)
       .populate("participants", "username name profilePic")
       .populate("messages.sender", "username name profilePic");
@@ -44,12 +47,21 @@ router.get("/:conversationId", async (req, res) => {
     if (!conversation)
       return res.status(404).json({ message: "Conversation not found" });
 
+    // ✅ Sort messages oldest → newest
+    conversation.messages.sort(
+      (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+    );
+
     res.status(200).json(conversation);
   } catch (error) {
     console.error("❌ Error fetching conversation:", error);
-    res.status(500).json({ message: "Error fetching conversation", error: error.message });
+    res.status(500).json({
+      message: "Error fetching conversation",
+      error: error.message,
+    });
   }
 });
+
 // ✅ Get all conversations for a user
 router.get("/user/:userId", async (req, res) => {
   try {
@@ -66,7 +78,24 @@ router.get("/user/:userId", async (req, res) => {
       return res.status(200).json([]); // no chats yet
     }
 
-    res.status(200).json(conversations);
+    // ✅ Add lastMessage info for UI preview
+    const formattedConversations = conversations.map((conv) => {
+      const lastMsg = conv.messages[conv.messages.length - 1];
+      return {
+        ...conv.toObject(),
+        lastMessage: lastMsg
+          ? {
+              text: lastMsg.text,
+              type: lastMsg.type,
+              fileUrl: lastMsg.fileUrl,
+              fileType: lastMsg.fileType,
+              createdAt: lastMsg.createdAt,
+            }
+          : null,
+      };
+    });
+
+    res.status(200).json(formattedConversations);
   } catch (error) {
     console.error("❌ Error fetching user conversations:", error);
     res.status(500).json({

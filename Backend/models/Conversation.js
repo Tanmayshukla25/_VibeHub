@@ -4,6 +4,7 @@ const messageSubSchema = new mongoose.Schema(
   {
     sender: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     text: { type: String },
+    type: { type: String, default: "text" }, 
     fileUrl: { type: String },
     fileType: { type: String },
     fileName: { type: String },

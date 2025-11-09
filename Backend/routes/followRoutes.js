@@ -55,4 +55,3 @@ router.get("/me/following", verifyToken, getMyFollowing);
 router.get("/:id/followers", verifyToken, getFollowersById);
 router.get("/:id/following", verifyToken, getFollowingById);
 export default router;
-

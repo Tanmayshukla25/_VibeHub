@@ -1,42 +1,46 @@
-
-
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import socket from "../socket";
 import instance from "../axiosConfig";
-import { Send, ArrowLeft } from "lucide-react";
+import { Send, ArrowLeft, Loader2, X } from "lucide-react";
 import defaultPic from "../assets/Defalutpic.png";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { BsEmojiSmile } from "react-icons/bs";
+import { HiGif } from "react-icons/hi2";
+import EmojiPicker from "emoji-picker-react";
+import axios from "axios";
+
+const GIPHY_KEY = "OiO0hNStAtc63RzCpl56kMNhOs58tPrp"
 
 const ChatRoom = () => {
   const { conversationId } = useParams();
   const [conversation, setConversation] = useState(null);
   const [user, setUser] = useState(null);
   const [text, setText] = useState("");
+  const [file, setFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showGifPicker, setShowGifPicker] = useState(false);
+  const [gifs, setGifs] = useState([]);
+  const [gifSearch, setGifSearch] = useState("");
   const messagesEndRef = useRef(null);
   const navigate = useNavigate();
 
-  // ✅ Normalize IDs safely
   const normalizeId = (id) => {
     if (!id) return "";
     if (typeof id === "object" && id._id) return String(id._id);
     return String(id);
   };
 
-  // ✅ Fetch current user and join personal socket room
+  // ✅ Fetch current user
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const tokenRes = await instance.get("/user/verifyToken", {
-          withCredentials: true,
-        });
+        const tokenRes = await instance.get("/user/verifyToken", { withCredentials: true });
         const userId = tokenRes.data.user.id;
-        const userRes = await instance.get(`/user/${userId}`, {
-          withCredentials: true,
-        });
+        const userRes = await instance.get(`/user/${userId}`, { withCredentials: true });
         setUser(userRes.data.user);
-
-        // ✅ Join user's personal socket room (for notifications)
         socket.emit("join_user", userId);
       } catch (err) {
         console.error("Error fetching user:", err);
@@ -45,7 +49,7 @@ const ChatRoom = () => {
     fetchUser();
   }, []);
 
-  // ✅ Fetch conversation messages
+  // ✅ Fetch conversation
   useEffect(() => {
     const fetchConversation = async () => {
       try {
@@ -55,42 +59,28 @@ const ChatRoom = () => {
         console.error("Error fetching conversation:", err);
       }
     };
-    fetchConversation();
+    if (conversationId) fetchConversation();
   }, [conversationId]);
 
-  // ✅ Join socket room for live updates
+  // ✅ Socket handling
   useEffect(() => {
     if (!conversationId) return;
-
-    // Join the specific conversation room
     socket.emit("join_conversation", conversationId);
 
-    // When a message is received
     const handleReceive = (message) => {
-      // ✅ Make sure the message belongs to this conversation
       if (message.conversationId !== conversationId) return;
-
-      // ✅ Avoid duplicates
       setConversation((prev) => {
-        if (!prev) return { messages: [message] };
-
+        if (!prev) return { messages: [message], participants: [] };
         const exists = prev.messages?.some(
-          (m) =>
-            m._id === message._id ||
-            (m.tempId && message.tempId && m.tempId === message.tempId)
+          (m) => m._id === message._id || (m.tempId && message.tempId && m.tempId === message.tempId)
         );
         if (exists) return prev;
-
-        return {
-          ...prev,
-          messages: [...(prev.messages || []), message],
-        };
+        return { ...prev, messages: [...(prev.messages || []), message] };
       });
     };
 
-    // ✅ Handle socket events
     socket.on("receive_message", handleReceive);
-    socket.on("receive_message_notification", handleReceive); // for receiver not in chat
+    socket.on("receive_message_notification", handleReceive);
 
     return () => {
       socket.off("receive_message", handleReceive);
@@ -98,50 +88,130 @@ const ChatRoom = () => {
     };
   }, [conversationId]);
 
-  // ✅ Auto-scroll on new messages
+  // ✅ Auto-scroll
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [conversation?.messages]);
 
-  // ✅ Send message logic
-  const handleSend = () => {
-    if (!text.trim() || !user) return;
+  // ✅ File preview handler
+  const handleFileSelect = (e) => {
+    const selected = e.target.files[0];
+    if (!selected) return;
+    setFile(selected);
+    setPreviewUrl(URL.createObjectURL(selected));
+  };
+
+  const cancelPreview = () => {
+    setFile(null);
+    setPreviewUrl(null);
+  };
+
+  // ✅ Fetch GIFs
+  const fetchGifs = async (q = "trending") => {
+    try {
+      const query = q?.trim() || "trending";
+      const url =
+        query === "trending"
+          ? `https://api.giphy.com/v1/gifs/trending?api_key=${GIPHY_KEY}&limit=24&rating=g`
+          : `https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_KEY}&q=${encodeURIComponent(
+              query
+            )}&limit=24&rating=g&lang=en`;
+      const res = await axios.get(url);
+      setGifs(res.data.data || []);
+    } catch (err) {
+      console.error("Failed to fetch gifs:", err);
+      setGifs([]);
+    }
+  };
+
+  useEffect(() => {
+    if (showGifPicker) fetchGifs("trending");
+  }, [showGifPicker]);
+
+  // ✅ Send message (text/gif/file)
+  const handleSend = async (override = null) => {
+    if (!user) return;
+    if (!file && !override && !text.trim()) return;
+
+    let content = override ?? text;
+    let messageType = "text";
+    let fileUrl = "";
+    let fileType = "";
+    let fileName = "";
+
+    if (file) {
+      try {
+        setUploading(true);
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const uploadRes = await axios.post(
+          `${import.meta.env.VITE_BACKEND_URL || "http://localhost:5000"}/upload/chatUpload`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+
+        fileUrl = uploadRes.data.fileUrl || uploadRes.data.url;
+        fileType = uploadRes.data.fileType;
+        fileName = uploadRes.data.fileName;
+        messageType = fileType.startsWith("video")
+          ? "video"
+          : fileType.startsWith("image")
+          ? "image"
+          : "file";
+      } catch (err) {
+        console.error("File upload failed:", err.response || err.message);
+        setUploading(false);
+        return;
+      } finally {
+        setUploading(false);
+      }
+    }
+
+    if (override?.startsWith("http")) messageType = "gif";
 
     const tempId = `temp-${Date.now()}`;
     const newMessage = {
       sender: user,
-      text,
+      text: content,
       tempId,
+      type: messageType,
+      fileUrl,
+      fileType,
+      fileName,
       createdAt: new Date().toISOString(),
-      conversationId, // add conversation context
+      conversationId,
     };
 
-    // Instant UI update
     setConversation((prev) => ({
       ...prev,
       messages: [...(prev?.messages || []), newMessage],
     }));
 
-    // Emit to server
     socket.emit("send_message", {
       conversationId,
       sender: user._id,
-      text,
+      text: content,
       tempId,
+      type: messageType,
+      fileUrl,
+      fileType,
+      fileName,
     });
 
     setText("");
+    setFile(null);
+    setPreviewUrl(null);
+    setShowGifPicker(false);
+    setShowEmojiPicker(false);
   };
 
   return (
-    <div className="flex flex-col min-h-screen pb-[80px] bg-white relative">
+    <div className="flex flex-col min-h-screen pb-[100px] bg-white relative">
       {/* Header */}
       <div className="flex items-center justify-between p-3 bg-[#719FB0] text-white shadow-md fixed top-0 w-full sm:w-[84%] z-40">
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate(-1)}
-            className="p-1 rounded-full hover:bg-white/20"
-          >
+          <button onClick={() => navigate(-1)} className="p-1 rounded-full hover:bg-white/20">
             <ArrowLeft size={22} />
           </button>
 
@@ -173,9 +243,7 @@ const ChatRoom = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2 }}
-              className={`flex items-end ${
-                isSender ? "justify-end" : "justify-start"
-              }`}
+              className={`flex items-end ${isSender ? "justify-end" : "justify-start"}`}
             >
               {!isSender && (
                 <img
@@ -192,13 +260,13 @@ const ChatRoom = () => {
                     : "bg-white border text-gray-800 mr-10"
                 }`}
               >
-                <p className="break-words leading-relaxed">{msg.text}</p>
-                <p className="text-[10px] mt-1 text-right opacity-70">
-                  {new Date(msg.createdAt || Date.now()).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </p>
+                {msg.type === "gif" && <img src={msg.text} alt="gif" className="w-56 h-56 object-cover rounded-lg" />}
+                {msg.type === "image" && <img src={msg.fileUrl} alt="image" className="w-56 h-56 object-cover rounded-lg" />}
+                {msg.type === "video" && <video controls className="w-64 rounded-lg"><source src={msg.fileUrl} type={msg.fileType} /></video>}
+                {msg.type === "file" && <a href={msg.fileUrl} target="_blank" rel="noopener noreferrer" className="underline text-sm">📎 {msg.fileName || "Download file"}</a>}
+                {msg.type === "text" && <p className="break-words leading-relaxed">{msg.text}</p>}
+
+                <p className="text-[10px] mt-1 text-right opacity-70">{new Date(msg.createdAt || Date.now()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
               </div>
             </motion.div>
           );
@@ -206,22 +274,97 @@ const ChatRoom = () => {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input (fixed bottom) */}
-      <div className="flex items-center p-3 border-t border-gray-200 bg-[#719FB0] fixed bottom-0 w-full sm:w-[84%] z-50">
-        <input
-          type="text"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Type a message..."
-          className="flex-1 px-4 py-2 border rounded-full bg-white focus:outline-none focus:ring-1 focus:ring-[#719FB0]"
-          onKeyDown={(e) => e.key === "Enter" && handleSend()}
-        />
-        <button
-          onClick={handleSend}
-          className="ml-2 bg-[#719FB0] p-2 rounded-full text-white hover:bg-[#5b899a] transition-all"
-        >
-          <Send size={20} />
-        </button>
+      {/* Preview Modal with Loader */}
+      <AnimatePresence>
+        {previewUrl && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/70 flex items-center justify-center z-[999]"
+          >
+            <div className="bg-white rounded-2xl shadow-xl p-4 w-[90%] max-w-sm relative flex flex-col items-center">
+              <button
+                onClick={cancelPreview}
+                disabled={uploading}
+                className="absolute top-2 right-2 text-gray-600 hover:text-red-500 disabled:opacity-50"
+              >
+                <X size={20} />
+              </button>
+
+              {!uploading && (
+                <>
+                  {file?.type?.startsWith("image") && <img src={previewUrl} alt="preview" className="w-full rounded-lg mb-3" />}
+                  {file?.type?.startsWith("video") && <video src={previewUrl} controls className="w-full rounded-lg mb-3" />}
+                  {!file?.type?.startsWith("image") && !file?.type?.startsWith("video") && <p className="text-center text-gray-700 mb-3">📄 {file?.name}</p>}
+                </>
+              )}
+
+              {uploading && (
+                <div className="flex flex-col items-center justify-center w-full h-48">
+                  <Loader2 size={40} className="animate-spin text-[#719FB0] mb-3" />
+                  <p className="text-gray-600 font-medium">Uploading...</p>
+                </div>
+              )}
+
+              <button
+                onClick={() => handleSend()}
+                disabled={uploading}
+                className={`w-full py-2 rounded-lg mt-2 transition-all ${
+                  uploading
+                    ? "bg-gray-400 cursor-not-allowed text-white"
+                    : "bg-[#719FB0] text-white hover:bg-[#5b899a]"
+                }`}
+              >
+                {uploading ? "Uploading..." : "Send"}
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Input Bar */}
+      <div className="fixed bottom-0 w-full sm:w-[84%] z-50 bg-[#719FB0] p-3 border-t border-gray-200">
+        {showEmojiPicker && <div className="absolute bottom-20 left-3 z-50"><EmojiPicker onEmojiClick={(emoji) => { setText((p) => p + emoji.emoji); setShowEmojiPicker(false); }} /></div>}
+        {showGifPicker && (
+          <div className="absolute bottom-20 right-3 z-50 bg-white rounded p-3 shadow-lg w-[320px] max-h-[360px] overflow-auto">
+            <div className="flex gap-2 mb-2">
+              <input value={gifSearch} onChange={(e) => setGifSearch(e.target.value)} placeholder="Search GIFs..." className="flex-1 border p-2 rounded" onKeyDown={(e) => e.key === "Enter" && fetchGifs(gifSearch)} />
+              <button onClick={() => fetchGifs(gifSearch || "trending")} className="px-3 py-2 bg-[#719FB0] text-white rounded">Search</button>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {gifs.map((g) => <img key={g.id} src={g.images.fixed_height_small.url} alt="gif" className="w-full h-24 object-cover rounded cursor-pointer" onClick={() => handleSend(g.images.fixed_height.url)} />)}
+            </div>
+          </div>
+        )}
+
+        <div className="flex items-center">
+          <button onClick={() => setShowEmojiPicker((s) => !s)} className="p-2 rounded-full mr-2 text-white"><BsEmojiSmile size={22} /></button>
+
+          <label className="cursor-pointer relative mr-2 group">
+            <div className="flex items-center justify-center p-2 rounded-full text-white transition-all duration-300 group-hover:rotate-45 group-hover:bg-[#5b899a]">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 transition-transform duration-300 group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21.44 11.05l-9.19 9.19a5 5 0 01-7.07-7.07l9.19-9.19a3 3 0 014.24 4.24l-9.19 9.19a1 1 0 01-1.41-1.41l8.13-8.13" />
+              </svg>
+            </div>
+            <input type="file" accept="image/*,video/*,application/pdf" hidden onChange={handleFileSelect} />
+          </label>
+
+          <button onClick={() => setShowGifPicker((s) => !s)} className="ml-1 p-2 rounded-full text-white"><HiGif size={22} /></button>
+
+          <input
+            type="text"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Type a message..."
+            className="flex-1 px-4 py-2 mx-2 border rounded-full bg-white focus:outline-none focus:ring-1 focus:ring-[#719FB0]"
+            onKeyDown={(e) => e.key === "Enter" && handleSend()}
+          />
+
+          <button onClick={() => handleSend()} className="ml-1 bg-[#5b899a] p-2 rounded-full text-white hover:bg-[#4a7583]" disabled={uploading}>
+            {uploading ? <Loader2 className="animate-spin" size={20} /> : <Send size={20} />}
+          </button>
+        </div>
       </div>
     </div>
   );

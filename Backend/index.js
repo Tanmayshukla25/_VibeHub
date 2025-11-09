@@ -10,6 +10,7 @@ import userRouter from "./routes/userRoutes.js";
 import followRouter from "./routes/followRoutes.js";
 import conversationRouter from "./routes/conversationRoutes.js";
 import Conversation from "./models/Conversation.js";
+import uploadRouter from "./routes/uploadRoutes.js";
 
 const app = express();
 const server = http.createServer(app);
@@ -32,6 +33,8 @@ app.use(express.json());
 app.use("/user", userRouter);
 app.use("/follow", followRouter);
 app.use("/conversation", conversationRouter);
+app.use("/upload", uploadRouter);
+
 
 await connectToDB();
 
@@ -55,43 +58,71 @@ io.on("connection", (socket) => {
   });
 
   // Handle sending messages
-  socket.on("send_message", async (data) => {
-    const { conversationId, sender, text, tempId } = data;
+// Handle sending messages
+// Handle sending messages
+socket.on("send_message", async (data) => {
+  const { conversationId, sender, text, tempId, type, fileUrl, fileType, fileName } = data;
 
-    try {
-      const conversation = await Conversation.findById(conversationId);
-      if (!conversation) return;
+  try {
+    const conversation = await Conversation.findById(conversationId);
+    if (!conversation) return;
 
-      const newMessage = { sender, text };
-      conversation.messages.push(newMessage);
-      await conversation.save();
+    // ✅ Determine type automatically if not provided
+    const messageType =
+      type ||
+      (fileUrl
+        ? fileType?.startsWith("image")
+          ? "image"
+          : fileType?.startsWith("video")
+          ? "video"
+          : "file"
+        : "text");
 
-      const populatedMsg = await Conversation.populate(newMessage, {
-        path: "sender",
-        select: "username name profilePic",
-      });
+    // ✅ Build message object
+    const newMessage = {
+      sender,
+      text: text || "",
+      type: messageType,
+      fileUrl: fileUrl || "",
+      fileType: fileType || "",
+      fileName: fileName || "",
+    };
 
-      // ✅ Emit to both participants
-      io.to(conversationId).emit("receive_message", {
-        ...populatedMsg,
-        conversationId,
-        tempId,
-      });
+    // ✅ Save in DB
+    conversation.messages.push(newMessage);
+    await conversation.save();
 
-      // ✅ Also emit to receiver’s personal room for notifications
-      conversation.participants.forEach((pId) => {
-        if (pId.toString() !== sender.toString()) {
-          io.to(pId.toString()).emit("receive_message_notification", {
-            conversationId,
-            sender,
-            text,
-          });
-        }
-      });
-    } catch (err) {
-      console.error("❌ Message error:", err.message);
-    }
-  });
+    const savedMsg = conversation.messages[conversation.messages.length - 1];
+
+    // ✅ Populate sender info
+    const populated = await Conversation.populate(savedMsg, {
+      path: "sender",
+      select: "username name profilePic",
+    });
+
+    // ✅ Send message to users in this chat room
+    io.to(conversationId).emit("receive_message", {
+      ...populated.toObject(),
+      conversationId,
+      tempId,
+    });
+
+    // ✅ Send notification to receiver
+    conversation.participants.forEach((pId) => {
+      if (pId.toString() !== sender.toString()) {
+        io.to(pId.toString()).emit("receive_message_notification", {
+          conversationId,
+          sender,
+          text,
+        });
+      }
+    });
+  } catch (err) {
+    console.error("❌ Message error:", err.message);
+  }
+});
+
+
 
   socket.on("disconnect", () => {
     console.log("🔴 Disconnected:", socket.id);
