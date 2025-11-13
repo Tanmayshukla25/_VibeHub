@@ -209,8 +209,8 @@ const ChatRoom = () => {
   return (
     <div className="flex flex-col min-h-screen pb-[100px] bg-white relative">
       {/* Header */}
-      <div className="flex items-center justify-between p-3 bg-[#719FB0] text-white shadow-md fixed top-0 w-full sm:w-[84%] z-40">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between p-1 bg-[#719FB0] text-white shadow-md fixed top-0 w-full sm:w-[84%] z-40">
+        <div className="flex items-center gap-2">
           <button onClick={() => navigate(-1)} className="p-1 rounded-full hover:bg-white/20">
             <ArrowLeft size={22} />
           </button>
@@ -324,48 +324,120 @@ const ChatRoom = () => {
       </AnimatePresence>
 
       {/* Input Bar */}
-      <div className="fixed bottom-0 w-full sm:w-[84%] z-50 bg-[#719FB0] p-3 border-t border-gray-200">
-        {showEmojiPicker && <div className="absolute bottom-20 left-3 z-50"><EmojiPicker onEmojiClick={(emoji) => { setText((p) => p + emoji.emoji); setShowEmojiPicker(false); }} /></div>}
-        {showGifPicker && (
-          <div className="absolute bottom-20 right-3 z-50 bg-white rounded p-3 shadow-lg w-[320px] max-h-[360px] overflow-auto">
-            <div className="flex gap-2 mb-2">
-              <input value={gifSearch} onChange={(e) => setGifSearch(e.target.value)} placeholder="Search GIFs..." className="flex-1 border p-2 rounded" onKeyDown={(e) => e.key === "Enter" && fetchGifs(gifSearch)} />
-              <button onClick={() => fetchGifs(gifSearch || "trending")} className="px-3 py-2 bg-[#719FB0] text-white rounded">Search</button>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              {gifs.map((g) => <img key={g.id} src={g.images.fixed_height_small.url} alt="gif" className="w-full h-24 object-cover rounded cursor-pointer" onClick={() => handleSend(g.images.fixed_height.url)} />)}
-            </div>
-          </div>
-        )}
+     <div className="fixed md:bottom-0 bottom-3  w-full sm:w-[84%] z-50 bg-[#719FB0] py-2.5 px-1.5 sm:p-3 border-t border-gray-200">
+  {/* Emoji Picker */}
+  {showEmojiPicker && (
+    <div className="absolute bottom-20 left-3 z-50">
+      <EmojiPicker
+        onEmojiClick={(emoji) => {
+          setText((p) => p + emoji.emoji);
+          setShowEmojiPicker(false);
+        }}
+      />
+    </div>
+  )}
 
-        <div className="flex items-center">
-          <button onClick={() => setShowEmojiPicker((s) => !s)} className="p-2 rounded-full mr-2 text-white"><BsEmojiSmile size={22} /></button>
-
-          <label className="cursor-pointer relative mr-2 group">
-            <div className="flex items-center justify-center p-2 rounded-full text-white transition-all duration-300 group-hover:rotate-45 group-hover:bg-[#5b899a]">
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 transition-transform duration-300 group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21.44 11.05l-9.19 9.19a5 5 0 01-7.07-7.07l9.19-9.19a3 3 0 014.24 4.24l-9.19 9.19a1 1 0 01-1.41-1.41l8.13-8.13" />
-              </svg>
-            </div>
-            <input type="file" accept="image/*,video/*,application/pdf" hidden onChange={handleFileSelect} />
-          </label>
-
-          <button onClick={() => setShowGifPicker((s) => !s)} className="ml-1 p-2 rounded-full text-white"><HiGif size={22} /></button>
-
-          <input
-            type="text"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="Type a message..."
-            className="flex-1 px-4 py-2 mx-2 border rounded-full bg-white focus:outline-none focus:ring-1 focus:ring-[#719FB0]"
-            onKeyDown={(e) => e.key === "Enter" && handleSend()}
-          />
-
-          <button onClick={() => handleSend()} className="ml-1 bg-[#5b899a] p-2 rounded-full text-white hover:bg-[#4a7583]" disabled={uploading}>
-            {uploading ? <Loader2 className="animate-spin" size={20} /> : <Send size={20} />}
-          </button>
-        </div>
+  {/* GIF Picker */}
+  {showGifPicker && (
+    <div className="absolute bottom-20 left-3 z-50 bg-white rounded p-3 shadow-lg w-[90%] sm:w-[320px] max-h-[360px] overflow-auto">
+      <div className="flex flex-col sm:flex-row gap-2 mb-2">
+        <input
+          value={gifSearch}
+          onChange={(e) => setGifSearch(e.target.value)}
+          placeholder="Search GIFs..."
+          className="flex-1 border p-2 rounded text-sm"
+          onKeyDown={(e) => e.key === "Enter" && fetchGifs(gifSearch)}
+        />
+        <button
+          onClick={() => fetchGifs(gifSearch || "trending")}
+          className="px-3 py-2 bg-[#719FB0] text-white rounded text-sm"
+        >
+          Search
+        </button>
       </div>
+      <div className="grid grid-cols-3 gap-2">
+        {gifs.map((g) => (
+          <img
+            key={g.id}
+            src={g.images.fixed_height_small.url}
+            alt="gif"
+            className="w-full h-24 object-cover rounded cursor-pointer"
+            onClick={() => handleSend(g.images.fixed_height.url)}
+          />
+        ))}
+      </div>
+    </div>
+  )}
+
+  {/* Message Input Section */}
+  <div className="flex items-center  sm:gap-3">
+    {/* Emoji */}
+    <button
+      onClick={() => setShowEmojiPicker((s) => !s)}
+      className="md:p-2 rounded-full text-white hover:bg-[#5b899a] transition"
+    >
+      <BsEmojiSmile size={22} />
+    </button>
+
+    {/* File Upload */}
+    <label className="cursor-pointer relative group">
+      <div className="flex items-center justify-center md:p-2 p-1 rounded-full text-white transition-all duration-300 group-hover:rotate-45 group-hover:bg-[#5b899a]">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="w-6 h-6 transition-transform duration-300 group-hover:scale-110"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M21.44 11.05l-9.19 9.19a5 5 0 01-7.07-7.07l9.19-9.19a3 3 0 014.24 4.24l-9.19 9.19a1 1 0 01-1.41-1.41l8.13-8.13"
+          />
+        </svg>
+      </div>
+      <input
+        type="file"
+        accept="image/*,video/*,application/pdf"
+        hidden
+        onChange={handleFileSelect}
+      />
+    </label>
+
+    {/* GIF Button */}
+    <button
+      onClick={() => setShowGifPicker((s) => !s)}
+      className="md:p-2 mr-2 md:mr-1  rounded-full text-white hover:bg-[#5b899a] transition"
+    >
+      <HiGif size={22} />
+    </button>
+
+    {/* Message Input */}
+    <input
+      type="text"
+      value={text}
+      onChange={(e) => setText(e.target.value)}
+      placeholder="Type a message..."
+      className="flex-1 px-4 py-2 border rounded-[8px]  md:rounded-[10px] mr-1 bg-white focus:outline-none focus:ring-1 focus:ring-[#5b899a] text-sm sm:text-base"
+      onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+    />
+
+    {/* Send Button */}
+    <button
+      onClick={() => handleSend()}
+      className="p-2 bg-[#5b899a] rounded-full text-white hover:bg-[#4a7583] transition disabled:opacity-70"
+      disabled={uploading}
+    >
+      {uploading ? (
+        <Loader2 className="animate-spin" size={20} />
+      ) : (
+        <Send size={20} />
+      )}
+    </button>
+  </div>
+</div>
+
     </div>
   );
 };

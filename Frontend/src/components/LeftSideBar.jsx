@@ -297,16 +297,18 @@ const Sidebar = () => {
       </div>
 
       {location.pathname === "/home" && (
-        <div className="fixed top-0 left-0 right-0 z-30 flex justify-between items-center bg-[#719FB0] border-b border-gray-300 shadow-sm px-4 py-3 md:hidden">
-          <img src={VibeHubLogo} alt="VibeHub Logo" className="w-20" />
+        <div className="fixed top-0 left-0 right-0 z-30 flex justify-between items-center bg-[#719FB0] border-b border-gray-300 shadow-sm px-4  md:hidden">
+          <img src={VibeHubLogo} alt="VibeHub Logo" className="w-15" />
           <div className="flex items-center gap-5">
             <Link to="/home/Notification" className="relative">
               <BellRing
                 animate={bellControls}
                 width={24}
                 height={24}
-                stroke="black"
+                stroke="currentColor"
+                className="text-gray-700 hover:text-gray-800 transition-colors duration-200"
               />
+
               {pendingCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 py-[1px] rounded-full">
                   {pendingCount}
@@ -314,7 +316,10 @@ const Sidebar = () => {
               )}
             </Link>
             <Link to="/home/messages">
-              <Send size={22} className="cursor-pointer hover:text-gray-600" />
+              <Send
+                size={22}
+                className="cursor-pointer text-gray-700 hover:text-gray-800"
+              />
             </Link>
           </div>
         </div>
