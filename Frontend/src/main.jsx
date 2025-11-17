@@ -5,7 +5,7 @@ import "./index.css";
 // 👈 Import Theme Context
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
+
     <App />
-  </React.StrictMode>
+ 
 );

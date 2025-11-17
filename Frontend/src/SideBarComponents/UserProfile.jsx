@@ -70,7 +70,8 @@ const UserProfile = () => {
   const [activePostComments, setActivePostComments] = useState([]);
   const [currentCommentPostId, setCurrentCommentPostId] = useState(null);
   const [commentText, setCommentText] = useState("");
-
+  const [showAIPopup, setShowAIPopup] = useState(false);
+  const [generatingCaption, setGeneratingCaption] = useState(false);
   const [activeTab, setActiveTab] = useState("posts");
 
   useEffect(() => {
@@ -207,6 +208,34 @@ const UserProfile = () => {
     const selected = Array.from(e.target.files);
     setFiles(selected);
     setPreviewFiles(selected.map((file) => URL.createObjectURL(file)));
+
+    if (selected.length > 0) setShowAIPopup(true);
+  };
+  const generateAICaption = async () => {
+    try {
+      setGeneratingCaption(true);
+
+      // Convert image to Base64
+      const base64 = await fileToBase64(files[0]);
+
+      // Upload Base64 to Cloudinary (NO MULTER!!)
+      const uploadRes = await instance.post("/upload/temp", { base64 });
+
+      const imageUrl = uploadRes.data.url;
+
+      // Send Cloudinary URL to AI API
+      const captionRes = await instance.post("/ai/generate-caption", {
+        imageUrl,
+      });
+
+      setCaption(captionRes.data.caption);
+      setShowAIPopup(false);
+    } catch (err) {
+      console.error("AI Caption Error:", err);
+      alert("Failed to generate caption");
+    } finally {
+      setGeneratingCaption(false);
+    }
   };
 
   const handleCreatePost = async (e) => {
@@ -215,7 +244,7 @@ const UserProfile = () => {
 
     const formData = new FormData();
     formData.append("caption", caption);
-    formData.append("author", user._id);
+    // formData.append("author", user._id);
     files.forEach((file) => formData.append("media", file));
 
     try {
@@ -313,6 +342,14 @@ const UserProfile = () => {
     setActivePostComments(updated.data);
   };
 
+  const fileToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
+  };
   // OPEN VIDEO MODAL
   const openVideoModal = (url) => {
     setCurrentVideoSrc(url);
@@ -323,7 +360,7 @@ const UserProfile = () => {
     setDoubleTapPostId(postId);
 
     // Auto-hide heart animation
-    setTimeout(() => setDoubleTapPostId(null), 600);
+    setTimeout(() => setDoubleTapPostId(null), 1000);
 
     // Perform like action
     handleToggleLike(postId);
@@ -591,7 +628,7 @@ const UserProfile = () => {
             {/* Profile Picture with Gradient Ring */}
             <div className="flex flex-col md:flex-row items-center md:items-start gap-6 -mt-16 relative z-10">
               <div className="relative group">
-                {auth?._id === user?.id ? (
+                {auth?._id === user?._id ? (
                   <label htmlFor="profilePic" className="cursor-pointer block">
                     <div className="absolute -inset-1 bg-[#719FB0] rounded-full opacity-75 group-hover:opacity-100 blur-sm transition"></div>
                     <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden ring-4 ring-white shadow-2xl">
@@ -804,89 +841,6 @@ const UserProfile = () => {
           </div>
         )}
 
-        {/* Create Post Modal - Modern */}
-        {/* <AnimatePresence>
-          {showCreateModal && (
-            <>
-              <motion.div
-                className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setShowCreateModal(false)}
-              />
-              <motion.div
-                className="fixed inset-0 flex justify-center items-center z-50 p-4"
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-              >
-                <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl w-full max-w-md relative max-h-[90vh] overflow-y-auto border border-white/20">
-                  <div className="sticky top-0 bg-[#719FB0] px-6 py-4 flex items-center justify-between rounded-t-3xl">
-                    <button
-                      onClick={() => setShowCreateModal(false)}
-                      className="text-white/80 hover:text-white transition"
-                    >
-                      <X size={24} />
-                    </button>
-                    <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                      <Plus size={20} />
-                      Create {postType === "video" ? "Video" : "Image"} Post
-                    </h2>
-                    <button
-                      onClick={handleCreatePost}
-                      disabled={uploading}
-                      className="text-white font-semibold disabled:opacity-50 hover:scale-105 transition"
-                    >
-                      {uploading ? "..." : "Post"}
-                    </button>
-                  </div>
-                  <div className="p-6 space-y-5">
-                    <textarea
-                      placeholder="Write a caption..."
-                      value={caption}
-                      onChange={(e) => setCaption(e.target.value)}
-                      rows="3"
-                      className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:border-purple-400 focus:outline-none resize-none transition hover:border-gray-300"
-                    />
-                    <input
-                      type="file"
-                      multiple
-                      accept={
-                        postType === "video"
-                          ? "video/*"
-                          : "image/*,image/jpeg,image/png"
-                      }
-                      onChange={handlePostFileChange}
-                      className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:border-purple-400 focus:outline-none transition hover:border-gray-300"
-                    />
-                    {previewFiles.length > 0 && (
-                      <div className="grid grid-cols-3 gap-3">
-                        {previewFiles.map((src, i) =>
-                          postType === "video" ? (
-                            <video
-                              key={i}
-                              src={src}
-                              className="w-full h-24 rounded-lg object-cover"
-                              controls
-                            />
-                          ) : (
-                            <img
-                              key={i}
-                              src={src}
-                              alt="preview"
-                              className="w-full h-24 object-cover rounded-lg"
-                            />
-                          )
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence> */}
         {/* Create Post Button - Floating */}
         {activeTab === "posts" && auth?._id === user?._id && (
           <div className="flex justify-center mb-8">
@@ -1036,6 +990,98 @@ const UserProfile = () => {
           )}
         </AnimatePresence>
         {/* Posts Grid - Masonry Style */}
+        <AnimatePresence>
+          {showAIPopup && (
+            <>
+              {/* Background Blur & Dim */}
+              <motion.div
+                className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => !generatingCaption && setShowAIPopup(false)}
+              />
+
+              {/* Popup Box */}
+              <motion.div
+                className="fixed inset-0 flex items-center justify-center z-50 p-4"
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+              >
+                <div
+                  className="
+          bg-white 
+          rounded-3xl 
+          shadow-2xl 
+          p-6 
+          w-full 
+          max-w-sm 
+          text-center 
+          border border-white/50 
+          backdrop-blur-xl
+        "
+                >
+                  {/* Heading */}
+                  <h2 className="text-xl font-semibold text-gray-800 mb-2">
+                    Generate Caption with AI?
+                  </h2>
+
+                  {/* Sub text */}
+                  <p className="text-gray-600 text-sm mb-6 leading-relaxed">
+                    Want AI to automatically create an attractive caption for
+                    your selected image?
+                  </p>
+
+                  {/* Buttons */}
+                  <div className="flex gap-3">
+                    {/* Cancel Button */}
+                    <button
+                      onClick={() => setShowAIPopup(false)}
+                      disabled={generatingCaption}
+                      className="
+                w-1/2 
+                py-2.5 
+                rounded-xl 
+                border border-gray-300
+                text-gray-600 
+                font-medium 
+                hover:bg-gray-100
+                transition
+                disabled:opacity-50
+              "
+                    >
+                      No
+                    </button>
+
+                    {/* AI Generate Button */}
+                    <button
+                      onClick={generateAICaption}
+                      disabled={generatingCaption}
+                      className="
+                w-1/2 
+                py-2.5 
+                rounded-xl 
+                bg-gradient-to-r from-[#1D5464] to-[#326f7d]
+                text-white 
+                font-semibold 
+                flex justify-center items-center gap-2
+                hover:opacity-90 
+                transition
+                disabled:opacity-50
+              "
+                    >
+                      {generatingCaption && (
+                        <Loader2 size={18} className="animate-spin" />
+                      )}
+                      {generatingCaption ? "Generating..." : "Yes, Generate"}
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
 
         {/* Saved Tab Empty State */}
         {activeTab === "saved" && (
@@ -1117,15 +1163,45 @@ const UserProfile = () => {
                   {doubleTapPostId === post._id && (
                     <motion.div
                       initial={{ scale: 0, opacity: 0 }}
-                      animate={{ scale: 1.5, opacity: 1 }}
-                      transition={{ duration: 0.4 }}
+                      animate={{
+                        scale: [0, 1.4, 1.2, 1], // Smooth Instagram pop bounce
+                        opacity: [0, 1, 1, 0], // Fade in → fade out
+                      }}
+                      transition={{
+                        duration: 0.8,
+                        ease: "easeOut",
+                        times: [0, 0.4, 0.7, 1], // Timing control for smoother motion
+                      }}
                       className="absolute inset-0 flex items-center justify-center z-30"
                     >
-                      <Heart
-                        size={100}
-                        className="text-red-500 drop-shadow-2xl"
-                        fill="red"
-                      />
+                      <svg
+                        width="120"
+                        height="120"
+                        viewBox="0 0 24 24"
+                        className="drop-shadow-2xl"
+                      >
+                        <defs>
+                          <linearGradient
+                            id="heartGradient"
+                            x1="0%"
+                            y1="0%"
+                            x2="100%"
+                            y2="100%"
+                          >
+                            <stop offset="0%" stopColor="#374151" />
+                            <stop offset="50%" stopColor="#f43f5e" />
+                            <stop offset="100%" stopColor="#fb923c" />
+                          </linearGradient>
+                        </defs>
+
+                        <path
+                          fill="url(#heartGradient)"
+                          d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 
+           2 5.42 4.42 3 7.5 3c1.74 0 3.41 1.01 4.5 2.09C13.09 4.01 
+           14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 
+           6.86-8.55 11.54L12 21.35z"
+                        />
+                      </svg>
                     </motion.div>
                   )}
 
@@ -1246,101 +1322,102 @@ const UserProfile = () => {
             />
           </div>
         )}
-       {commentModalOpen && (
-  <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <motion.div
-      initial={{ scale: 0.9, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      exit={{ scale: 0.9, opacity: 0 }}
-      className="bg-white w-full max-w-md rounded-3xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden"
-    >
-      {/* Header */}
-      <div className="px-5 py-4 border-b border-gray-200 flex justify-between items-center bg-white sticky top-0 z-20">
-        <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-          Comments
-          <span className="text-sm text-gray-500">
-            ({activePostComments.length})
-          </span>
-        </h2>
-
-        <button
-          onClick={() => setCommentModalOpen(false)}
-          className="hover:bg-gray-100 p-2 rounded-full transition"
-        >
-          <CloseIcon size={20} className="text-gray-500" />
-        </button>
-      </div>
-
-      {/* Comments List */}
-      <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
-        {activePostComments.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-10">
-            <MessageCircle size={48} className="text-gray-300 mb-4" />
-            <p className="text-gray-600 font-medium">No comments yet</p>
-            <p className="text-sm text-gray-400">Be the first to comment!</p>
-          </div>
-        ) : (
-          activePostComments.map((c) => (
-            <div key={c._id} className="flex gap-3">
-              <img
-                src={c.user?.profilePic || defaultPic}
-                alt={c.user?.username}
-                className="w-11 h-11 rounded-full object-cover border border-gray-200"
-              />
-
-              <div className="flex-1 bg-gray-50 p-3 rounded-xl">
-                <div className="flex justify-between items-start">
-                  <h4 className="font-semibold text-gray-800 text-sm">
-                    {c.user?.username}
-                  </h4>
-                  <span className="text-[10px] text-gray-400">
-                    {new Date(c.createdAt).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                    })}
+        {commentModalOpen && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white w-full max-w-md rounded-3xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden"
+            >
+              {/* Header */}
+              <div className="px-5 py-4 border-b border-gray-200 flex justify-between items-center bg-white sticky top-0 z-20">
+                <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                  Comments
+                  <span className="text-sm text-gray-500">
+                    ({activePostComments.length})
                   </span>
+                </h2>
+
+                <button
+                  onClick={() => setCommentModalOpen(false)}
+                  className="hover:bg-gray-100 p-2 rounded-full transition"
+                >
+                  <CloseIcon size={20} className="text-gray-500" />
+                </button>
+              </div>
+
+              {/* Comments List */}
+              <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
+                {activePostComments.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-10">
+                    <MessageCircle size={48} className="text-gray-300 mb-4" />
+                    <p className="text-gray-600 font-medium">No comments yet</p>
+                    <p className="text-sm text-gray-400">
+                      Be the first to comment!
+                    </p>
+                  </div>
+                ) : (
+                  activePostComments.map((c) => (
+                    <div key={c._id} className="flex gap-3">
+                      <img
+                        src={c.user?.profilePic || defaultPic}
+                        alt={c.user?.username}
+                        className="w-11 h-11 rounded-full object-cover border border-gray-200"
+                      />
+
+                      <div className="flex-1 bg-gray-50 p-3 rounded-xl">
+                        <div className="flex justify-between items-start">
+                          <h4 className="font-semibold text-gray-800 text-sm">
+                            {c.user?.username}
+                          </h4>
+                          <span className="text-[10px] text-gray-400">
+                            {new Date(c.createdAt).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                            })}
+                          </span>
+                        </div>
+
+                        <p className="text-gray-700 text-sm mt-1 leading-snug">
+                          {c.text}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Add Comment Input – Floating Bar */}
+              <form
+                onSubmit={handleAddComment}
+                className="flex items-center gap-3 p-4 border-t border-gray-200 bg-white sticky bottom-0"
+              >
+                <img
+                  src={user?.profilePic || defaultPic}
+                  className="w-9 h-9 rounded-full object-cover"
+                />
+
+                <div className="flex-1 bg-gray-100 rounded-2xl px-4 py-2">
+                  <input
+                    className="w-full bg-transparent outline-none text-sm text-gray-700"
+                    placeholder="Add a comment..."
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                  />
                 </div>
 
-                <p className="text-gray-700 text-sm mt-1 leading-snug">
-                  {c.text}
-                </p>
-              </div>
-            </div>
-          ))
+                <button
+                  type="submit"
+                  disabled={!commentText.trim()}
+                  className="text-[#719FB0] font-semibold disabled:opacity-40"
+                >
+                  Post
+                </button>
+              </form>
+            </motion.div>
+          </div>
         )}
-      </div>
-
-      {/* Add Comment Input – Floating Bar */}
-      <form
-        onSubmit={handleAddComment}
-        className="flex items-center gap-3 p-4 border-t border-gray-200 bg-white sticky bottom-0"
-      >
-        <img
-          src={user?.profilePic || defaultPic}
-          className="w-9 h-9 rounded-full object-cover"
-        />
-
-        <div className="flex-1 bg-gray-100 rounded-2xl px-4 py-2">
-          <input
-            className="w-full bg-transparent outline-none text-sm text-gray-700"
-            placeholder="Add a comment..."
-            value={commentText}
-            onChange={(e) => setCommentText(e.target.value)}
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={!commentText.trim()}
-          className="text-[#719FB0] font-semibold disabled:opacity-40"
-        >
-          Post
-        </button>
-      </form>
-    </motion.div>
-  </div>
-)}
-
       </div>
     </div>
   );

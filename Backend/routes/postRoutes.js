@@ -10,11 +10,13 @@ import {
   addComment,         // 🆕 Added
   getPostComments,    // 🆕 Added
 } from "../controllers/postController.js";
+import { verifyToken } from "../middleware/CheckToken.js";
 
 const router = express.Router();
 
 // 📸 Create new post
-router.post("/create", uploadCloud.array("media", 10), createPost);
+router.post("/create", verifyToken, uploadCloud.array("media", 10), createPost);
+
 
 // ❤️ Like/Unlike post
 router.post("/like/:id", toggleLikePost);
@@ -32,7 +34,7 @@ router.delete("/:postId", deletePost);
 router.get("/user/:userId", getUserPosts);
 
 // 🌍 Get all posts
-router.get("/", getAllPosts);
+router.get("/all", getAllPosts);
 
 // ⭐ GET SINGLE POST (required for like UI to stay after reload)
 router.get("/:id", async (req, res) => {
@@ -52,5 +54,10 @@ router.get("/:id", async (req, res) => {
     res.status(500).json({ message: "Error fetching post", error });
   }
 });
+
+
+// GET ALL POSTS (Public Feed)
+
+
 
 export default router;

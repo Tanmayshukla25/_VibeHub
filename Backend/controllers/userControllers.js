@@ -112,6 +112,7 @@ export const UserLogin = async (req, res) => {
     const token = jwt.sign(
       {
         id: user._id,
+        _id: user._id,
         email: user.email,
         username: user.username,
         name: user.name,
@@ -135,6 +136,7 @@ export const UserLogin = async (req, res) => {
         message: "Login successful",
         user: {
           id: user._id,
+          _id: user._id,
           username: user.username,
           name: user.name,
           email: user.email,
@@ -217,8 +219,7 @@ export const updateProfile = async (req, res) => {
       updatedData.profilePic = req.file.path || req.file.secure_url;
     } else {
       // ✅ No image uploaded — set a default image if missing
-      updatedData.profilePic =
-        "/Default.png"; // relative to frontend public folder or CDN
+      updatedData.profilePic = "/Default.png"; // relative to frontend public folder or CDN
     }
 
     // Step 2: Update user
@@ -249,7 +250,6 @@ export const updateProfile = async (req, res) => {
   }
 };
 
-
 export const checkAuth = async (req, res) => {
   return res.status(200).json({
     success: true,
@@ -258,21 +258,12 @@ export const checkAuth = async (req, res) => {
   });
 };
 
-
 export const updateFullProfile = async (req, res) => {
   console.log("✅ Reached updateFullProfile controller");
   try {
     const { id } = req.params;
-    const {
-      name,
-      username,
-      email,
-      bio,
-      dob,
-      website,
-      isPrivate,
-      password,
-    } = req.body;
+    const { name, username, email, bio, dob, website, isPrivate, password } =
+      req.body;
 
     console.log("User ID:", id);
     console.log("Request body:", req.body);
@@ -299,9 +290,7 @@ export const updateFullProfile = async (req, res) => {
 
     // If no fields were sent in the request
     if (Object.keys(updatedData).length === 0) {
-      return res
-        .status(400)
-        .json({ message: "No fields provided to update." });
+      return res.status(400).json({ message: "No fields provided to update." });
     }
 
     // Update and return the new user document
@@ -323,7 +312,6 @@ export const updateFullProfile = async (req, res) => {
       .json({ message: "Internal server error", error: error.message });
   }
 };
-
 
 export const getMyProfile = async (req, res) => {
   try {

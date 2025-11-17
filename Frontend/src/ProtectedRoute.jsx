@@ -5,18 +5,20 @@ import { UserContext } from "./UserContext";
 
 function ProtectedRoute({ children }) {
   const [loading, setLoading] = useState(true);
-const { auth, setAuth } = useContext(UserContext);
+const { auth, setAuth,setUser } = useContext(UserContext);
 
   useEffect(() => {
     async function checkLogin() {
-      try {
-        const res = await instance.get("/user/verifyToken", { withCredentials: true });
-        console.log(" User Authenticated:", res.data.user);
-        setAuth(true);
-      } catch (err) {
-        console.log(" Not Logged In:", err.response?.data || err.message);
-        setAuth(false);
-      } finally {
+    try {
+  const res = await instance.get("/user/verifyToken", { withCredentials: true });
+  console.log("User Authenticated:", res.data.user);
+  setAuth(true);
+  setUser(res.data.user);  // ⭐ THIS FIXES EVERYTHING
+} catch (err) {
+  setAuth(false);
+  setUser(null);
+}
+ finally {
         setLoading(false);
       }
     }

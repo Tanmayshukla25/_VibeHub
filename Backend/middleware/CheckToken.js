@@ -20,6 +20,7 @@ export const verifyToken = (req, res, next) => {
     console.log("🔹 Decoded Token:", decoded);
 
     req.user = {
+      _id: decoded._id,
       id: decoded.id,
       email: decoded.email,
       username: decoded.username,
