@@ -23,7 +23,7 @@ const FollowersList = ({ onSelect }) => {
   };
 
   return (
-    <div className="grid grid-cols-4 gap-4 mt-4">
+    <div className="grid grid-cols-4 gap-4 mt-1">
       {followers.map((u) => {
         const isSelected = selectedUser === u._id;
 
@@ -53,7 +53,7 @@ const FollowersList = ({ onSelect }) => {
             </div>
 
             {/* Username */}
-            <p className="text-sm mt-1 text-center line-clamp-1">
+            <p className="text-[12px] mt-1 text-center line-clamp-1">
               {u.username}
             </p>
 

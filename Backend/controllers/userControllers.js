@@ -318,7 +318,9 @@ export const updateFullProfile = async (req, res) => {
 export const getMyProfile = async (req, res) => {
   try {
     const userId = req.user.id;
-    const user = await UserAuth.findById(userId)
+    // Use the imported `User` model (default import name at top of file)
+    const user = await User.findById(userId)
+      .select("-password -verificationCode -verificationCodeExpires")
       .populate("followers", "username name profilePic")
       .populate("following", "username name profilePic");
     res.status(200).json({ user });

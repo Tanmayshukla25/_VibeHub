@@ -43,8 +43,7 @@ const ReelsComponent = () => {
       const videos = res.data.filter((p) => {
         const m = p.media?.[0];
         return (
-          m &&
-          (m.type?.startsWith("video") || /\.(mp4|webm|ogg)$/i.test(m.url))
+          m && (m.type?.startsWith("video") || /\.(mp4|webm|ogg)$/i.test(m.url))
         );
       });
       setReels(videos);
@@ -53,54 +52,52 @@ const ReelsComponent = () => {
     fetchReels();
   }, [loggedUserId]);
 
-// Pause all videos on tab change or tab hidden
-useEffect(() => {
-  const handleVisibility = () => {
-    if (document.hidden) {
-      Object.values(videoRefs.current).forEach((v) => v?.pause());
-    }
-  };
+  // Pause all videos on tab change or tab hidden
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.hidden) {
+        Object.values(videoRefs.current).forEach((v) => v?.pause());
+      }
+    };
 
-  document.addEventListener("visibilitychange", handleVisibility);
-  return () =>
-    document.removeEventListener("visibilitychange", handleVisibility);
-}, []);
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibility);
+  }, []);
 
   // Auto-play & auto-mute on scroll
-// Auto detect current video & play only the visible one
-// Play only the video that is most visible using IntersectionObserver
-useEffect(() => {
-  if (!reels.length) return;
+  // Auto detect current video & play only the visible one
+  // Play only the video that is most visible using IntersectionObserver
+  useEffect(() => {
+    if (!reels.length) return;
 
-  let observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        const video = entry.target;
+    let observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const video = entry.target;
 
-        if (entry.isIntersecting && entry.intersectionRatio > 0.75) {
-          // Play the video in view
-          video.play().catch(() => {});
-        } else {
-          // Pause all others
-          video.pause();
-        }
-      });
-    },
-    {
-      threshold: [0.25, 0.5, 0.75, 1],
-    }
-  );
+          if (entry.isIntersecting && entry.intersectionRatio > 0.75) {
+            // Play the video in view
+            video.play().catch(() => {});
+          } else {
+            // Pause all others
+            video.pause();
+          }
+        });
+      },
+      {
+        threshold: [0.25, 0.5, 0.75, 1],
+      }
+    );
 
-  // Observe every video
-  reels.forEach((post) => {
-    const vid = videoRefs.current[post._id];
-    if (vid) observer.observe(vid);
-  });
+    // Observe every video
+    reels.forEach((post) => {
+      const vid = videoRefs.current[post._id];
+      if (vid) observer.observe(vid);
+    });
 
-  return () => observer.disconnect();
-}, [reels]);
-
-
+    return () => observer.disconnect();
+  }, [reels]);
 
   // Tap to play/pause
   const togglePlay = (postId) => {
@@ -169,8 +166,7 @@ useEffect(() => {
           return (
             <div
               key={post._id}
-              className="relative  mx-auto mb-10 bg-black rounded-xl shadow-xl overflow-hidden"
-              style={{ width: "350px", height: "720px" }}
+              className="relative  mx-auto mb-10 w-[340px] h-[430px] md:w-[350px] md:h-[650px] bg-black rounded-xl shadow-xl overflow-hidden"
               onClick={() => togglePlay(post._id)}
             >
               {/* VIDEO */}
@@ -207,13 +203,17 @@ useEffect(() => {
                     return next;
                   });
                 }}
-                className="absolute bottom-4 right-8 bg-black/60 text-white p-2 rounded-full z-50"
+                className="absolute bottom-4 right-3 bg-black/60 text-white p-2 rounded-full z-50"
               >
-                {mutedMap[post._id] ? <VscMute size={22} /> : <VscUnmute size={22} />}
+                {mutedMap[post._id] ? (
+                  <VscMute size={22} />
+                ) : (
+                  <VscUnmute size={22} />
+                )}
               </button>
 
               {/* RIGHT BUTTONS */}
-              <div className="absolute right-4 bottom-40 flex flex-col items-center gap-4 z-20">
+              <div className="absolute right-4 bottom-30 md:bottom-40 flex flex-col items-center gap-4 z-20">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -221,13 +221,12 @@ useEffect(() => {
                   }}
                 >
                   <Heart
-                    size={34}
+                    size={32}
                     fill={isLiked ? "red" : "none"}
                     className={isLiked ? "text-red-500" : "text-white"}
                   />
-                <p className="text-white">{post.likes.length}</p>
+                  <p className="text-white">{post.likes.length}</p>
                 </button>
-
 
                 <button
                   onClick={(e) => {
@@ -235,7 +234,8 @@ useEffect(() => {
                     openComments(post._id);
                   }}
                 >
-                  <MessageCircle size={34} className="text-white" />
+                  <MessageCircle size={28} className="text-white" />
+                  <p className="text-white">{post.comments.length}</p>
                 </button>
 
                 <button
@@ -245,7 +245,7 @@ useEffect(() => {
                     setOpenSendSheetFor(post._id);
                   }}
                 >
-                  <Send size={30} className="text-white" />
+                  <Send size={28} className="text-white" />
                 </button>
               </div>
 

@@ -14,6 +14,7 @@ import aiRoutes from "./routes/aiRoutes.js";
 // 🆕 Import Post System
 import postRouter from "./routes/postRoutes.js";
 import uploadTempRoutes from "./routes/uploadTempRoutes.js"; // ✅ Added for post system
+import storyRouter from "./routes/storyRoutes.js";
 
 const app = express();
 const server = http.createServer(app);
@@ -43,6 +44,7 @@ app.use("/ai", aiRoutes);
 // ✅ Add Post Routes (new)
 app.use("/post", postRouter); // 👈 This enables /post/create, /post/user/:id, /post (GET all)
 app.use("/upload", uploadTempRoutes);
+app.use("/story", storyRouter);
 await connectToDB();
 
 // ====================== SOCKET.IO SECTION ======================
