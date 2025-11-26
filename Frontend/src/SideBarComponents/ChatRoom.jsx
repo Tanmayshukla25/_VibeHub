@@ -281,7 +281,7 @@ const ChatRoom = () => {
               )}
 
               <div
-                className={`max-w-[70%] px-4 py-2 rounded-2xl shadow-sm ${
+                className={`md:max-w-[70%] px-4 py-2 rounded-2xl shadow-sm ${
                   isSender
                     ? "bg-[#719FB0] text-white ml-10"
                     : "bg-white border text-gray-800 mr-10"
@@ -291,18 +291,18 @@ const ChatRoom = () => {
                   <img
                     src={msg.text}
                     alt="gif"
-                    className="w-56 h-56 object-cover rounded-lg"
+                    className="w-30 md:w-56 md:h-56 object-cover rounded-lg"
                   />
                 )}
                 {msg.type === "image" && (
                   <img
                     src={msg.fileUrl}
                     alt="image"
-                    className="w-56 h-56 object-cover rounded-lg"
+                    className=" w-30 md:w-56 md:h-56 object-cover rounded-lg"
                   />
                 )}
                 {msg.type === "video" && (
-                  <video controls className="w-64 rounded-lg">
+                  <video controls className="w-30 md:w-56 md:h-56 rounded-lg">
                     <source src={msg.fileUrl} type={msg.fileType} />
                   </video>
                 )}
@@ -319,13 +319,13 @@ const ChatRoom = () => {
                 {/* ⭐ SHARED POST MESSAGE BLOCK */}
                 {msg.type === "post" && msg.postId && (
                   <div
-                    className="w-56 bg-white rounded-xl shadow-md overflow-hidden border cursor-pointer"
+                    className="w-30 md:w-56 h-30 md:h-56 bg-white rounded-xl shadow-md overflow-hidden border cursor-pointer"
                     onClick={() => navigate(`/home/${msg.postId._id}`)}
                   >
                     {msg.postId.media?.[0]?.type?.startsWith("video") ? (
                       <video
                         src={msg.postId.media?.[0]?.url}
-                        className="w-full h-48 object-cover"
+                        className="w-30 md:w-56 md:h-56 object-cover"
                         controls
                         muted
                       />
@@ -435,7 +435,7 @@ const ChatRoom = () => {
       </AnimatePresence>
 
       {/* Input Bar */}
-      <div className="fixed md:bottom-0 bottom-3  w-full sm:w-[84%] z-50 bg-[#719FB0] py-2.5 px-1.5 sm:p-3 border-t border-gray-200">
+      <div className="fixed md:bottom-0 bottom-3  w-full sm:w-[84%] z-100 bg-[#719FB0] py-2.5 px-1.5 sm:p-3 border-t border-gray-200">
         {/* Emoji Picker */}
         {showEmojiPicker && (
           <div className="absolute bottom-20 left-3 z-50">

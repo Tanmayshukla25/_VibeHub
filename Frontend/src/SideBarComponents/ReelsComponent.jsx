@@ -53,34 +53,54 @@ const ReelsComponent = () => {
     fetchReels();
   }, [loggedUserId]);
 
+// Pause all videos on tab change or tab hidden
+useEffect(() => {
+  const handleVisibility = () => {
+    if (document.hidden) {
+      Object.values(videoRefs.current).forEach((v) => v?.pause());
+    }
+  };
+
+  document.addEventListener("visibilitychange", handleVisibility);
+  return () =>
+    document.removeEventListener("visibilitychange", handleVisibility);
+}, []);
+
   // Auto-play & auto-mute on scroll
-  useEffect(() => {
-    const handleScroll = () => {
-      const viewport = window.innerHeight;
+// Auto detect current video & play only the visible one
+// Play only the video that is most visible using IntersectionObserver
+useEffect(() => {
+  if (!reels.length) return;
 
-      Object.entries(videoRefs.current).forEach(([postId, video]) => {
-        if (!video) return;
+  let observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        const video = entry.target;
 
-        const rect = video.getBoundingClientRect();
-        const isVisible =
-          rect.top < viewport * 0.70 && rect.bottom > viewport * 0.30;
-
-        if (isVisible) {
-          const shouldMute = mutedMap[postId] ?? true;
-          video.muted = shouldMute;
+        if (entry.isIntersecting && entry.intersectionRatio > 0.75) {
+          // Play the video in view
           video.play().catch(() => {});
         } else {
+          // Pause all others
           video.pause();
-          video.muted = true;
         }
       });
-    };
+    },
+    {
+      threshold: [0.25, 0.5, 0.75, 1],
+    }
+  );
 
-    window.addEventListener("scroll", handleScroll);
-    handleScroll();
+  // Observe every video
+  reels.forEach((post) => {
+    const vid = videoRefs.current[post._id];
+    if (vid) observer.observe(vid);
+  });
 
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [reels, mutedMap]);
+  return () => observer.disconnect();
+}, [reels]);
+
+
 
   // Tap to play/pause
   const togglePlay = (postId) => {
