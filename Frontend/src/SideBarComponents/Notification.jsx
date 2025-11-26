@@ -49,7 +49,7 @@ const Notifications = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f0f7ff] via-[#e7f3ff] to-[#f9fbff] flex flex-col">
+    <div className="min-h-screen md:pt-0 pt-12 bg-gradient-to-br from-[#f0f7ff] via-[#e7f3ff] to-[#f9fbff] flex flex-col">
       {/* Header */}
       <div className="sticky top-0 z-20 bg-white/60 backdrop-blur-md border-b border-slate-200 shadow-sm">
         <div className="max-w-5xl mx-auto px-5 py-4 flex items-center gap-3">
@@ -57,8 +57,8 @@ const Notifications = () => {
             <Bell className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-slate-800">Notifications</h1>
-            <p className="text-slate-500 text-sm">Manage your follow requests</p>
+            <h1 className="md:text-2xl font-bold text-slate-800">Notifications</h1>
+            <p className="text-slate-500 md:text-sm text-[13px]">Manage your follow requests</p>
           </div>
         </div>
       </div>
@@ -86,7 +86,7 @@ const Notifications = () => {
                     <p className="font-semibold text-slate-800 text-base">
                       {req.sender?.name || "Unknown"}
                     </p>
-                    <p className="text-sm text-slate-500">@{req.sender?.username}</p>
+                    <p className="text-sm text-slate-500">{req.sender?.username}</p>
                     <p className="text-xs text-slate-400 mt-1">Sent you a follow request</p>
                   </div>
                 </div>
@@ -126,8 +126,8 @@ const Notifications = () => {
         ) : (
           <div className="flex flex-col items-center justify-center py-24 text-center">
             <div className="bg-white/70 backdrop-blur-sm p-6 rounded-2xl shadow-md">
-              <UserPlus className="w-12 h-12 text-[#1D5464] mx-auto mb-3" />
-              <p className="text-lg font-semibold text-slate-700">No new follow requests</p>
+              <UserPlus className="md:w-12 md:h-12 text-[#1D5464] mx-auto mb-3" />
+              <p className="md:text-lg font-semibold text-slate-700">No new follow requests</p>
               <p className="text-slate-500 text-sm mt-1">
                 You’ll see new requests here when someone follows you.
               </p>

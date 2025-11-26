@@ -57,6 +57,7 @@ import {
   checkAuth,
   updateFullProfile,
   getMyProfile,
+  deleteAccount,
 } from "../controllers/userControllers.js";
 import {
   sendVerificationCode,
@@ -88,5 +89,6 @@ router.put("/update/:id", uploadCloud.single("profilePic"), updateFullProfile);
 
 // ---------- ALWAYS KEEP THIS LAST ----------
 router.get("/:id", getUserById);
+router.delete("/delete", verifyToken, deleteAccount);
 
 export default router;

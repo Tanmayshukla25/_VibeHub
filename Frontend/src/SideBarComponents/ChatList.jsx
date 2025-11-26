@@ -9,6 +9,7 @@ const ChatList = () => {
   const [conversations, setConversations] = useState([]);
   const [user, setUser] = useState(null);
   const [search, setSearch] = useState("");
+  
   const navigate = useNavigate();
 
   useEffect(() => {

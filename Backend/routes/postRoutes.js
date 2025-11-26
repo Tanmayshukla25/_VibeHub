@@ -39,14 +39,24 @@ router.get("/all", getAllPosts);
 // ⭐ GET SINGLE POST (required for like UI to stay after reload)
 router.get("/:id", async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id);
+    const post = await Post.findById(req.params.id)
+      .populate("author", "username profilePic")
+      .populate("comments.user", "username profilePic")
+      .lean();
 
     if (!post) return res.status(404).json({ message: "Post not found" });
 
-    // ⭐ FIX: Convert likes to string IDs
+    // ⭐ Normalize IDs and likes to strings so frontend logic is consistent
     const cleanPost = {
-      ...post._doc,
-      likes: post.likes.map((l) => l.toString()),
+      ...post,
+      _id: String(post._id),
+      author: post.author ? { ...post.author, _id: String(post.author._id) } : null,
+      likes: (post.likes || []).map((l) => (typeof l === "string" ? l : String(l))),
+      comments: (post.comments || []).map((c) => ({
+        ...c,
+        _id: String(c._id),
+        user: c.user ? { ...c.user, _id: String(c.user._id) } : null,
+      })),
     };
 
     res.status(200).json({ post: cleanPost });

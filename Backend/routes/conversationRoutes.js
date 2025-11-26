@@ -1,5 +1,7 @@
 import express from "express";
 import Conversation from "../models/Conversation.js";
+import { getSinglePost, sendPostController } from "../controllers/sendPostController.js";
+import { verifyToken } from "../middleware/CheckToken.js";
 
 const router = express.Router();
 
@@ -36,18 +38,50 @@ router.post("/start", async (req, res) => {
 });
 
 // ✅ Get conversation by ID
+// router.get("/:conversationId", async (req, res) => {
+//   try {
+//     const { conversationId } = req.params;
+
+//     const conversation = await Conversation.findById(conversationId)
+//       .populate("participants", "username name profilePic")
+//       .populate("messages.sender", "username name profilePic");
+
+//     if (!conversation)
+//       return res.status(404).json({ message: "Conversation not found" });
+
+//     // ✅ Sort messages oldest → newest
+//     conversation.messages.sort(
+//       (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+//     );
+
+//     res.status(200).json(conversation);
+//   } catch (error) {
+//     console.error("❌ Error fetching conversation:", error);
+//     res.status(500).json({
+//       message: "Error fetching conversation",
+//       error: error.message,
+//     });
+//   }
+// });
+
+
 router.get("/:conversationId", async (req, res) => {
   try {
     const { conversationId } = req.params;
 
     const conversation = await Conversation.findById(conversationId)
       .populate("participants", "username name profilePic")
-      .populate("messages.sender", "username name profilePic");
+      .populate("messages.sender", "username name profilePic")
+      .populate({
+        path: "messages.postId",
+        select: "media caption author",
+        populate: { path: "author", select: "username profilePic" }
+      });
 
     if (!conversation)
       return res.status(404).json({ message: "Conversation not found" });
 
-    // ✅ Sort messages oldest → newest
+    // sort messages
     conversation.messages.sort(
       (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
     );
@@ -105,4 +139,6 @@ router.get("/user/:userId", async (req, res) => {
   }
 });
 
+router.post("/send-post", verifyToken, sendPostController);
+router.post("/send-post", verifyToken, getSinglePost);
 export default router;

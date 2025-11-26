@@ -2,12 +2,21 @@ import mongoose from "mongoose";
 
 const messageSubSchema = new mongoose.Schema(
   {
-    sender: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    sender: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     text: { type: String },
-    type: { type: String, default: "text" }, 
+    type: { type: String, default: "text" },
     fileUrl: { type: String },
     fileType: { type: String },
     fileName: { type: String },
+    postId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Post",
+      default: null,
+    },
   },
   { timestamps: true }
 );

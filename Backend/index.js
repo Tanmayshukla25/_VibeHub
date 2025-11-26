@@ -1,4 +1,3 @@
-
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -77,6 +76,7 @@ io.on("connection", (socket) => {
       fileUrl,
       fileType,
       fileName,
+      postId,
     } = data;
 
     try {
@@ -102,23 +102,28 @@ io.on("connection", (socket) => {
         fileUrl: fileUrl || "",
         fileType: fileType || "",
         fileName: fileName || "",
+        postId: postId || null,
       };
 
       // ✅ Save message in DB
       conversation.messages.push(newMessage);
       await conversation.save();
 
-      const savedMsg = conversation.messages[conversation.messages.length - 1];
+      // ✅ Fetch updated conversation with populated fields
+      const updatedConv = await Conversation.findById(conversationId)
+        .populate("participants", "username name profilePic")
+        .populate("messages.sender", "username name profilePic")
+        .populate({
+          path: "messages.postId",
+          select: "media caption author",
+          populate: { path: "author", select: "username profilePic" }
+        });
 
-      // ✅ Populate sender info
-      const populated = await Conversation.populate(savedMsg, {
-        path: "sender",
-        select: "username name profilePic",
-      });
+      const populatedMsg = updatedConv.messages[updatedConv.messages.length - 1];
 
       // ✅ Emit to users in the chat room
       io.to(conversationId).emit("receive_message", {
-        ...populated.toObject(),
+        ...populatedMsg.toObject(),
         conversationId,
         tempId,
       });
@@ -144,6 +149,4 @@ io.on("connection", (socket) => {
 });
 
 // ====================== SERVER START ======================
-server.listen(PORT, () =>
-  console.log(`🚀 Server running on port ${PORT}`)
-);
+server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

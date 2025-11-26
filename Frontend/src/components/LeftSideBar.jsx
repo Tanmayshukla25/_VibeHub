@@ -177,17 +177,19 @@ const Sidebar = () => {
               </li>
             </Link>
 
-            <li
-              onClick={() => setActive("Reels")}
-              className={`flex items-center gap-4 px-3 mt-2 py-2 rounded-xl transition-all duration-200 cursor-pointer ${
-                active === "Reels"
-                  ? "bg-gray-100 font-semibold"
-                  : "hover:bg-gray-100"
-              }`}
-            >
-              <Clapperboard size={24} />
-              <span>Reels</span>
-            </li>
+            <Link to="/home/reels">
+              <li
+                onClick={() => setActive("Reels")}
+                className={`flex items-center mb-2 gap-4 px-3 mt-2 py-2 rounded-xl transition-all duration-200 cursor-pointer ${
+                  active === "Reels"
+                    ? "bg-gray-100 font-semibold"
+                    : "hover:bg-gray-100"
+                }`}
+              >
+                <Clapperboard size={24} />
+                <span>Reels</span>
+              </li>
+            </Link>
 
             <Link to="/home/messages">
               <li
@@ -296,38 +298,49 @@ const Sidebar = () => {
         </div>
       </div>
 
-      {location.pathname === "/home" && (
-        <div className="fixed top-0 left-0 right-0 z-30 flex justify-between items-center bg-[#719FB0] border-b border-gray-300 shadow-sm px-4  md:hidden">
-          <img src={VibeHubLogo} alt="VibeHub Logo" className="w-15" />
-          <div className="flex items-center gap-5">
-            <Link to="/home/Notification" className="relative">
-              <BellRing
-                animate={bellControls}
-                width={24}
-                height={24}
-                stroke="currentColor"
-                className="text-gray-700 hover:text-gray-800 transition-colors duration-200"
-              />
+      {/* 🔹 Mobile Top Header (Now visible on ALL tabs) */}
+      <div className="fixed top-0 left-0 right-0 z-100 flex md:hidden justify-between items-center bg-[#719FB0] border-b border-gray-300 shadow-sm px-4 ">
+     <img src={VibeHubLogo} alt="VibeHub Logo" className="w-15" />
 
-              {pendingCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 py-[1px] rounded-full">
-                  {pendingCount}
-                </span>
-              )}
-            </Link>
-            <Link to="/home/messages">
-              <Send
-                size={22}
-                className="cursor-pointer text-gray-700 hover:text-gray-800"
+        <div className="flex items-center gap-5">
+          <Link to="/home/Notification" className="relative">
+            <BellRing
+              animate={bellControls}
+              width={24}
+              height={24}
+              stroke="currentColor"
+              className="text-gray-800 hover:text-black transition-colors"
+            />
+
+            {pendingCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 py-[1px] rounded-full">
+                {pendingCount}
+              </span>
+            )}
+          </Link>
+
+          <Link to="/home/ChatList" onClick={() => setActive("ChatList")}>
+            <div
+              className={`p-2 rounded-full transition-all duration-200 ${
+                active === "ChatList"
+                  ? "border-2 border-black bg-white/30"
+                  : "border-2 border-transparent"
+              }`}
+            >
+              <BsChatDots
+                size={26}
+                className={`${
+                  active === "ChatList" ? "text-black" : "text-gray-700"
+                }`}
               />
-            </Link>
-          </div>
+            </div>
+          </Link>
         </div>
-      )}
+      </div>
 
       {/* 🔹 Mobile Bottom Navbar */}
       {/* 🔹 Mobile Bottom Navbar */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 flex md:hidden justify-around items-center bg-[#719FB0] py-3 border-t border-gray-300 shadow-lg">
+      <div className="fixed bottom-0 left-0 right-0 z-100 flex md:hidden justify-around items-center bg-[#719FB0] py-3 border-t border-gray-300 shadow-lg">
         <Link to="/home" onClick={() => setActive("Home")}>
           <div
             className={`p-2 rounded-full transition-all duration-200 ${
@@ -379,19 +392,19 @@ const Sidebar = () => {
           </div>
         </Link>
 
-        <Link to="/home/ChatList" onClick={() => setActive("ChatList")}>
+        <Link to="/home/reels" onClick={() => setActive("Reels")}>
           <div
             className={`p-2 rounded-full transition-all duration-200 ${
-              active === "ChatList"
+              active === "Reels"
                 ? "border-2 border-black bg-white/30"
                 : "border-2 border-transparent"
             }`}
           >
-            <BsChatDots
+            <Clapperboard
               size={26}
               className={`${
-                active === "ChatList" ? "text-black" : "text-gray-600"
-              } transition-colors`}
+                active === "Reels" ? "text-black scale-110" : "text-gray-600"
+              } transition-all`}
             />
           </div>
         </Link>

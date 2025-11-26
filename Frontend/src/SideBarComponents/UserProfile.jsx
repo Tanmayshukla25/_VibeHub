@@ -73,7 +73,8 @@ const UserProfile = () => {
   const [showAIPopup, setShowAIPopup] = useState(false);
   const [generatingCaption, setGeneratingCaption] = useState(false);
   const [activeTab, setActiveTab] = useState("posts");
-
+  const [reelModalOpen, setReelModalOpen] = useState(false);
+  const [selectedReelPost, setSelectedReelPost] = useState(null);
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
@@ -100,6 +101,10 @@ const UserProfile = () => {
 
     fetchUserDetails();
   }, []);
+  const openVideoModal = (post) => {
+    setSelectedReelPost(post);
+    setReelModalOpen(true);
+  };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -204,13 +209,31 @@ const UserProfile = () => {
   };
 
   // 🆕 Post Upload Handlers
+  // const handlePostFileChange = (e) => {
+  //   const selected = Array.from(e.target.files);
+  //   setFiles(selected);
+  //   setPreviewFiles(selected.map((file) => URL.createObjectURL(file)));
+
+  //   if (selected.length > 0) setShowAIPopup(true);
+  // };
+
+  // Post Upload Handlers
   const handlePostFileChange = (e) => {
     const selected = Array.from(e.target.files);
     setFiles(selected);
-    setPreviewFiles(selected.map((file) => URL.createObjectURL(file)));
 
-    if (selected.length > 0) setShowAIPopup(true);
+    // Create blob URLs for preview
+    const urls = selected.map((file) => URL.createObjectURL(file));
+    setPreviewFiles(urls);
+
+    // Only show AI caption popup for images, not videos
+    if (postType === "image" && selected.length > 0) {
+      setShowAIPopup(true);
+    } else {
+      setShowAIPopup(false);
+    }
   };
+
   const generateAICaption = async () => {
     try {
       setGeneratingCaption(true);
@@ -351,10 +374,7 @@ const UserProfile = () => {
     });
   };
   // OPEN VIDEO MODAL
-  const openVideoModal = (url) => {
-    setCurrentVideoSrc(url);
-    setVideoModalOpen(true);
-  };
+
   // DOUBLE TAP LIKE
   const handleDoubleTap = (postId) => {
     setDoubleTapPostId(postId);
@@ -388,7 +408,7 @@ const UserProfile = () => {
     );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
+    <div className=" min-h-screen md:pt-0 pt-10 bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
       {/* Floating Notification */}
       <AnimatePresence>
         {(success || error) && (
@@ -451,11 +471,11 @@ const UserProfile = () => {
                   </button>
                 </div>
 
-                <div className="p-6 space-y-5">
+                <div className=" p-6 space-y-5">
                   {/* Profile Picture with Ring */}
                   <div className="flex flex-col items-center py-4">
                     <div className="relative group">
-                      <div className="absolute -inset-1 bg-[#719FB0] rounded-full opacity-75 group-hover:opacity-100 blur transition"></div>
+                      <div className=" absolute -inset-1 bg-[#719FB0] rounded-full opacity-75 group-hover:opacity-100 blur transition"></div>
                       <img
                         src={preview || user?.profilePic || defaultPic}
                         alt="profile"
@@ -579,7 +599,7 @@ const UserProfile = () => {
       </AnimatePresence>
 
       {/* Mobile Menu - Glassmorphism */}
-      <div className="fixed top-6 right-6 z-50 md:hidden">
+      <div className="absolute top-20 right-6 z-50 md:hidden">
         <button
           className="p-3 bg-white/90 backdrop-blur-xl rounded-full shadow-xl hover:scale-110 transition border border-white/20"
           onClick={() => setShowMenu((prev) => !prev)}
@@ -612,7 +632,7 @@ const UserProfile = () => {
       </div>
 
       {/* Main Content Container */}
-      <div className="max-w-5xl mx-auto px-4 py-8">
+      <div className=" max-w-6xl mx-auto px-4 py-8">
         {/* Profile Card - Glassmorphism with Gradient */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -637,10 +657,9 @@ const UserProfile = () => {
                         alt="profile"
                         className="w-full h-full object-cover"
                       />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                        <Camera className="w-8 h-8 text-white" />
-                      </div>
                     </div>
+                    <Camera className="w-8 h-8 text-white absolute top-10" />
+
                     <input
                       type="file"
                       id="profilePic"
@@ -656,7 +675,7 @@ const UserProfile = () => {
                       <img
                         src={user?.profilePic || defaultPic}
                         alt="profile"
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover bg-white"
                       />
                     </div>
                   </div>
@@ -813,6 +832,7 @@ const UserProfile = () => {
                     exit={{ opacity: 0, scale: 0.9, y: 10 }}
                     className="absolute top-full mt-4 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-xl shadow-2xl border border-white/20 rounded-2xl overflow-hidden z-50 w-48"
                   >
+                    {/* Image Post */}
                     <button
                       onClick={() => {
                         setPostType("image");
@@ -824,6 +844,7 @@ const UserProfile = () => {
                       <ImageIcon size={18} /> Image Post
                     </button>
 
+                    {/* Video Post */}
                     <button
                       onClick={() => {
                         setPostType("video");
@@ -925,26 +946,45 @@ const UserProfile = () => {
 
                   <div className="flex-1 overflow-y-auto p-4 space-y-4">
                     {/* Media Preview - Grid for Multiple */}
+                    {/* Media Preview */}
                     {previewFiles.length > 0 ? (
-                      <div className="grid grid-cols-3 gap-2">
-                        {previewFiles.map((src, i) => (
-                          <div
-                            key={i}
-                            className="relative rounded-lg overflow-hidden bg-gray-100 aspect-square"
-                          >
-                            <img
-                              src={src}
-                              alt={`Preview ${i + 1}`}
-                              className="w-full h-full object-cover"
-                            />
-                            {i === files.length - 1 && files.length > 9 && (
-                              <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white text-sm font-bold">
-                                +{files.length - 9}
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
+                      postType === "video" ? (
+                        // 🎥 VIDEO PREVIEW
+                        <div className="relative rounded-lg overflow-hidden bg-black aspect-video">
+                          <video
+                            src={previewFiles[0]}
+                            className="w-full h-full object-cover"
+                            controls
+                          />
+
+                          {previewFiles.length > 1 && (
+                            <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full">
+                              +{previewFiles.length - 1} more
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        // 🖼 IMAGE PREVIEW GRID
+                        <div className="grid grid-cols-3 gap-2">
+                          {previewFiles.map((src, i) => (
+                            <div
+                              key={i}
+                              className="relative rounded-lg overflow-hidden bg-gray-100 aspect-square"
+                            >
+                              <img
+                                src={src}
+                                alt={`Preview ${i + 1}`}
+                                className="w-full h-full object-cover"
+                              />
+                              {i === files.length - 1 && files.length > 9 && (
+                                <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white text-sm font-bold">
+                                  +{files.length - 9}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )
                     ) : (
                       // No media selected - Placeholder like IG
                       <div className="flex flex-col items-center justify-center py-12 border-2 border-dashed border-gray-300 rounded-xl">
@@ -952,17 +992,22 @@ const UserProfile = () => {
                           <ImageIcon size={24} className="text-gray-500" />
                         </div>
                         <p className="text-gray-500 font-medium mb-1">
-                          Select Photos to Post
+                          {postType === "video"
+                            ? "Select videos to post"
+                            : "Select photos to post"}
                         </p>
                         <p className="text-sm text-gray-400 mb-4">
-                          Tap to add photos
+                          Tap to add{" "}
+                          {postType === "video" ? "videos" : "photos"}
                         </p>
                         <label className="bg-[#3897f0] text-white px-6 py-2 rounded-full text-sm font-semibold cursor-pointer hover:opacity-90 transition">
                           Select from Gallery
                           <input
                             type="file"
                             multiple
-                            accept="image/*,image/jpeg,image/png"
+                            accept={
+                              postType === "video" ? "video/*" : "image/*"
+                            }
                             onChange={handlePostFileChange}
                             className="hidden"
                           />
@@ -1155,7 +1200,7 @@ const UserProfile = () => {
 
                     // Single tap for video
                     if (post.media[0].type === "video") {
-                      openVideoModal(post.media[0].url);
+                      openVideoModal(post);
                     }
                   }}
                 >
@@ -1305,23 +1350,90 @@ const UserProfile = () => {
               </motion.div>
             ))}
         </div>
-        {videoModalOpen && (
-          <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+        {reelModalOpen && selectedReelPost && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 bg-black/90 z-[9999] flex items-center justify-center"
+          >
+            {/* CLOSE BUTTON */}
             <button
-              onClick={() => setVideoModalOpen(false)}
-              className="absolute top-4 right-4 bg-white/20 backdrop-blur p-2 rounded-full"
+              onClick={() => setReelModalOpen(false)}
+              className="absolute top-5 right-5 text-white bg-white/20 backdrop-blur p-2 rounded-full"
             >
-              <CloseIcon size={20} className="text-white" />
+              <X size={28} />
             </button>
 
-            <video
-              src={currentVideoSrc}
-              controls
-              autoPlay
-              className="w-full max-w-2xl rounded-xl shadow-xl"
-            />
-          </div>
+            {/* MAIN VIDEO AREA */}
+            <div className="relative h-full max-h-[90vh] w-full max-w-sm flex flex-col items-center">
+              {/* VIDEO */}
+              <video
+                src={selectedReelPost.media[0].url}
+                className="w-full h-full object-cover rounded-xl"
+                autoPlay
+                loop
+                playsInline
+                controls={false}
+              />
+
+              {/* RIGHT SIDE ACTION BUTTONS */}
+              <div className="absolute right-4 bottom-20 flex flex-col items-center gap-6">
+                {/* LIKE */}
+                <button onClick={() => handleToggleLike(selectedReelPost._id)}>
+                  <Heart
+                    size={34}
+                    fill={
+                      selectedReelPost.likes.includes(user?._id)
+                        ? "red"
+                        : "none"
+                    }
+                    className={
+                      selectedReelPost.likes.includes(user?._id)
+                        ? "text-red-500"
+                        : "text-white"
+                    }
+                  />
+                </button>
+                <p className="text-white text-sm">
+                  {selectedReelPost.likes.length}
+                </p>
+
+                {/* COMMENT */}
+                <button
+                  onClick={() => {
+                    setReelModalOpen(false);
+                    openComments(selectedReelPost._id);
+                  }}
+                >
+                  <MessageCircle size={34} className="text-white" />
+                </button>
+
+                {/* SHARE */}
+                <Send size={30} className="text-white" />
+              </div>
+
+              {/* BOTTOM USER INFO BOX */}
+              <div className="absolute bottom-4 left-4 right-20 text-white">
+                <div className="flex items-center gap-3 mb-2">
+                  <img
+                    src={selectedReelPost.author?.profilePic || defaultPic}
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                  <p className="font-semibold">
+                    {selectedReelPost.author?.username}
+                  </p>
+                </div>
+
+                {/* CAPTION */}
+                <p className="text-sm opacity-90">
+                  <b>{selectedReelPost.author?.username}: </b>{" "}
+                  {selectedReelPost.caption}
+                </p>
+              </div>
+            </div>
+          </motion.div>
         )}
+
         {commentModalOpen && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <motion.div

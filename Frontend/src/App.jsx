@@ -85,6 +85,8 @@ import CheckProfile from "./SideBarComponents/CheckProfile";
 import ChatRoom from "./SideBarComponents/ChatRoom";
 import ChatList from "./SideBarComponents/ChatList";
 import MessagesPage from "./SideBarComponents/MessagesPage";
+import SinglePostPage from "./SideBarComponents/SinglePostPage";
+import ReelsComponent from "./SideBarComponents/ReelsComponent";
 
 const App = () => {
   const router = createBrowserRouter([
@@ -104,6 +106,7 @@ const App = () => {
       children: [
         { index: true, element: <FrontPage /> },
         { path: "/home/explore", element: <Explore /> },
+        { path: "/home/reels", element: <ReelsComponent/> },
         { path: "/home/UserProfile", element: <UserProfile /> },
         { path: "/home/SearchBar", element: <SearchBar /> },
         { path: "/home/post", element: <Post /> },
@@ -116,6 +119,7 @@ const App = () => {
         { path: "/home/messages", element: <MessagesPage /> },
         { path: "/home/chat/:conversationId", element: <ChatRoom /> },
         { path: "/home/ChatList", element: <ChatList /> },
+        { path: "/home/:postId", element: <SinglePostPage /> },
       ],
     },
   ]);

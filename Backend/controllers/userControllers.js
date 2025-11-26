@@ -1,6 +1,8 @@
 import User from "../models/userSchema.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import Conversation from "../models/Conversation.js";
+import Post from "../models/postSchema.js";
 
 //User Register
 
@@ -323,5 +325,54 @@ export const getMyProfile = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error fetching user profile" });
+  }
+};
+
+
+
+export const deleteAccount = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // 1️⃣ Remove user from other people's followers/following
+    await User.updateMany(
+      { followers: userId },
+      { $pull: { followers: userId } }
+    );
+    await User.updateMany(
+      { following: userId },
+      { $pull: { following: userId } }
+    );
+
+    // 2️⃣ Delete all posts created by this user
+    await Post.deleteMany({ author: userId });
+
+    // 3️⃣ Delete follow requests involving this user
+    await FollowRequest.deleteMany({
+      $or: [{ sender: userId }, { receiver: userId }],
+    });
+
+    // 4️⃣ Remove user's messages in all chats
+    await Conversation.updateMany(
+      { "messages.sender": userId },
+      { $pull: { messages: { sender: userId } } }
+    );
+
+    // 5️⃣ Remove the user from conversation participants
+    await Conversation.updateMany(
+      { participants: userId },
+      { $pull: { participants: userId } }
+    );
+
+    // 6️⃣ Delete empty conversations
+    await Conversation.deleteMany({ participants: { $size: 0 } });
+
+    // 7️⃣ Finally delete the user
+    await User.findByIdAndDelete(userId);
+
+    return res.json({ message: "Account deleted successfully!" });
+  } catch (error) {
+    console.log("❌ Delete error:", error);
+    return res.status(500).json({ error: "Something went wrong" });
   }
 };

@@ -118,16 +118,16 @@ const Explore = () => {
   );
 
   return (
-    <div className="pb-15 min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
+    <div className="pb-15 pt-12 md:pt-0 min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-10 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center gap-2">
             <div className="bg-gradient-to-br from-[#4A7C8C] to-[#1D5464] p-2 rounded-lg shadow-md">
-              <Sparkles className="w-5 h-5 text-white" />
+              <Sparkles className="  md:w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-slate-800">
+              <h1 className="md:text-2xl font-bold text-slate-800">
                 Discover People
               </h1>
               <p className="text-slate-600 text-xs mt-0.5">

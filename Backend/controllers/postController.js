@@ -72,13 +72,24 @@ export const getAllPosts = async (req, res) => {
 export const getUserPosts = async (req, res) => {
   try {
     const { userId } = req.params;
-    let posts = await Post.find({ author: userId }).sort({ createdAt: -1 });
+    // ✅ Populate author and comments.user so frontend has username/profilePic
+    let posts = await Post.find({ author: userId })
+      .populate("author", "username profilePic _id")
+      .populate("comments.user", "username profilePic _id")
+      .sort({ createdAt: -1 })
+      .lean();
 
-    // ⭐ FIX: convert likes (ObjectId) → string
+    // ⭐ Normalize IDs and likes to strings
     posts = posts.map((p) => ({
-      ...p._doc,
-      likes: p.likes.map((l) => l.toString()),
-      comments: p.comments || [],
+      ...p,
+      _id: String(p._id),
+      author: p.author ? { ...p.author, _id: String(p.author._id) } : null,
+      likes: (p.likes || []).map((l) => (typeof l === "string" ? l : String(l))),
+      comments: (p.comments || []).map((c) => ({
+        ...c,
+        _id: String(c._id),
+        user: c.user ? { ...c.user, _id: String(c.user._id) } : null,
+      })),
     }));
 
     res.status(200).json(posts);
