@@ -162,15 +162,24 @@ const StoryUploadModal = ({ isOpen, onClose, onUploaded }) => {
       if (songUrl) form.append("songUrl", songUrl);
       if (songName) form.append("songName", songName);
 
-      await instance.post("/story/create", form, {
+      console.log("📤 Uploading story with:", {
+        file: file.name,
+        songUrl: songUrl ? "yes" : "no",
+        songName: songName || "none",
+      });
+
+      const response = await instance.post("/story/create", form, {
         headers: { "Content-Type": "multipart/form-data" },
         withCredentials: true,
       });
 
+      console.log("✅ Upload successful:", response.data);
       onUploaded && onUploaded();
       onClose();
     } catch (err) {
-      console.log("Upload error", err);
+      console.error("❌ Upload error:", err);
+      const errorMsg = err.response?.data?.details || err.message || "Upload failed";
+      alert(`Story upload error: ${errorMsg}`);
     } finally {
       setUploading(false);
     }
