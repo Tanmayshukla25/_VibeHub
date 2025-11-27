@@ -203,48 +203,17 @@ const StoryUploadModal = ({ isOpen, onClose, onUploaded }) => {
               <X size={22} />
             </button>
             <h2 className="font-semibold">Create Story</h2>
-           <button
-  onClick={handleUpload}
-  disabled={!file || uploading}
-  className="bg-white text-pink-600 px-4 py-1 rounded-full flex items-center justify-center"
->
-  {uploading ? (
-    <motion.div
-      className="flex gap-1"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-    >
-      <motion.span
-        className="w-2 h-2 bg-pink-600 rounded-full"
-        animate={{ y: [0, -6, 0] }}
-        transition={{ duration: 0.6, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.span
-        className="w-2 h-2 bg-pink-600 rounded-full"
-        animate={{ y: [0, -6, 0] }}
-        transition={{
-          duration: 0.6,
-          repeat: Infinity,
-          ease: "easeInOut",
-          delay: 0.15,
-        }}
-      />
-      <motion.span
-        className="w-2 h-2 bg-pink-600 rounded-full"
-        animate={{ y: [0, -6, 0] }}
-        transition={{
-          duration: 0.6,
-          repeat: Infinity,
-          ease: "easeInOut",
-          delay: 0.3,
-        }}
-      />
-    </motion.div>
-  ) : (
-    "Share"
-  )}
-</button>
-
+            <button
+              onClick={handleUpload}
+              disabled={!file || uploading}
+              className="bg-white text-pink-600 px-4 py-1 rounded-full flex items-center justify-center"
+            >
+              {uploading ? (
+                <span className="w-5 h-5 border-2 border-pink-600 border-t-transparent rounded-full animate-spin"></span>
+              ) : (
+                "Share"
+              )}
+            </button>
           </div>
 
           {/* BODY */}

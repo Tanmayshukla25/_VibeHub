@@ -3,38 +3,98 @@ import User from "../models/userSchema.js";
 import cloudinary from "../config/cloudinary.js";
 import fs from "fs";
 
+// export const createPost = async (req, res) => {
+//   try {
+//     const caption = req.body.caption;
+//     const author = req.user.id;
+
+//     if (!req.files || req.files.length === 0) {
+//       return res.status(400).json({ message: "No files uploaded" });
+//     }
+
+//     const uploadedFiles = [];
+
+//     for (const file of req.files) {
+//       let result;
+//       if (file.mimetype.startsWith("video")) {
+//         result = await cloudinary.uploader.upload_large(file.path, {
+//           folder: "user_uploads",
+//           resource_type: "video",
+//         });
+//       } else {
+//         result = await cloudinary.uploader.upload(file.path, {
+//           folder: "user_uploads",
+//           resource_type: "auto",
+//         });
+//       }
+
+//       uploadedFiles.push({
+//         type: file.mimetype.startsWith("video") ? "video" : "image",
+//         url: result.secure_url,
+//         public_id: result.public_id,
+//       });
+
+//       if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+//     }
+
+//     const newPost = new Post({
+//       caption,
+//       author,
+//       media: uploadedFiles,
+//     });
+
+//     await newPost.save();
+
+//       await User.findByIdAndUpdate(author, {
+//       $push: { posts: newPost._id }
+//     });
+
+//     res.status(201).json({ message: "Post created", post: newPost });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// };
+
+// 🧩 Get All Posts
+
 export const createPost = async (req, res) => {
   try {
-    const caption = req.body.caption;
-    const author = req.user.id; 
+    const { caption, files } = req.body;
+    const author = req.user.id;
 
-    if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ message: "No files uploaded" });
+    if (!files || files.length === 0) {
+      return res.status(400).json({ message: "No files provided" });
     }
 
     const uploadedFiles = [];
 
-    for (const file of req.files) {
+    for (let fileData of files) {
+      const { file, mimetype } = fileData;
       let result;
-      if (file.mimetype.startsWith("video")) {
-        result = await cloudinary.uploader.upload_large(file.path, {
+
+      if (mimetype.startsWith("video")) {
+        // LONG + SHORT VIDEO
+        result = await cloudinary.uploader.upload_large(file, {
           folder: "user_uploads",
           resource_type: "video",
+          chunk_size: 60000000, // 6MB chunks
+          timeout: 600000, // 🔥 10 minutes timeout for large videos
         });
       } else {
-        result = await cloudinary.uploader.upload(file.path, {
+        // IMAGE
+        result = await cloudinary.uploader.upload(file, {
           folder: "user_uploads",
-          resource_type: "auto",
+          resource_type: "image",
+          timeout: 60000, // 1 minute timeout for images
         });
       }
 
       uploadedFiles.push({
-        type: file.mimetype.startsWith("video") ? "video" : "image",
+        type: mimetype.startsWith("video") ? "video" : "image",
         url: result.secure_url,
         public_id: result.public_id,
       });
-
-      if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
     }
 
     const newPost = new Post({
@@ -44,21 +104,17 @@ export const createPost = async (req, res) => {
     });
 
     await newPost.save();
-
-      await User.findByIdAndUpdate(author, {
-      $push: { posts: newPost._id }
+    await User.findByIdAndUpdate(author, {
+      $push: { posts: newPost._id },
     });
 
     res.status(201).json({ message: "Post created", post: newPost });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    console.error("❌ Post Upload Error:", error);
+    res.status(500).json({ error: "Server error", details: error.message });
   }
 };
 
-
-
-// 🧩 Get All Posts
 export const getAllPosts = async (req, res) => {
   try {
     const posts = await Post.find()
@@ -70,7 +126,6 @@ export const getAllPosts = async (req, res) => {
     res.status(500).json({ message: "Error fetching posts", error });
   }
 };
-
 
 // 👤 Get Posts by a Specific User
 export const getUserPosts = async (req, res) => {
@@ -88,7 +143,9 @@ export const getUserPosts = async (req, res) => {
       ...p,
       _id: String(p._id),
       author: p.author ? { ...p.author, _id: String(p.author._id) } : null,
-      likes: (p.likes || []).map((l) => (typeof l === "string" ? l : String(l))),
+      likes: (p.likes || []).map((l) =>
+        typeof l === "string" ? l : String(l)
+      ),
       comments: (p.comments || []).map((c) => ({
         ...c,
         _id: String(c._id),

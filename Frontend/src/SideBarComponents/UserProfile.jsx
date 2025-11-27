@@ -259,36 +259,101 @@ const UserProfile = () => {
     }
   };
 
+  // const handleCreatePost = async (e) => {
+  //   e.preventDefault();
+  //   if (!files.length) return alert("Please select at least one file");
+
+  //   const formData = new FormData();
+  //   formData.append("caption", caption);
+  //   // formData.append("author", user._id);
+  //   files.forEach((file) => formData.append("media", file));
+
+  //   try {
+  //     setUploading(true);
+  //     const res = await instance.post("/post/create", formData, {
+  //       headers: { "Content-Type": "multipart/form-data" },
+  //       withCredentials: true,
+  //     });
+
+  //     setSuccess("Post created successfully!");
+  //     setShowCreateModal(false);
+  //     setFiles([]);
+  //     setPreviewFiles([]);
+  //     setCaption("");
+  //     setPosts((prev) => [res.data.post, ...prev]);
+  //   } catch (err) {
+  //     console.error("Error creating post:", err);
+  //     setError("Failed to create post.");
+  //   } finally {
+  //     setUploading(false);
+  //   }
+  // };
+  // LIKE / UNLIKE POST
+  
   const handleCreatePost = async (e) => {
-    e.preventDefault();
-    if (!files.length) return alert("Please select at least one file");
+  e.preventDefault();
 
-    const formData = new FormData();
-    formData.append("caption", caption);
-    // formData.append("author", user._id);
-    files.forEach((file) => formData.append("media", file));
+  if (!files.length) return alert("Select a file");
 
-    try {
-      setUploading(true);
-      const res = await instance.post("/post/create", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-        withCredentials: true,
+  try {
+    setUploading(true); // 🔥 Start Loader Here
+
+    const base64Files = [];
+
+    for (let file of files) {
+      const reader = new FileReader();
+
+      const base64 = await new Promise((resolve, reject) => {
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file); 
       });
 
-      setSuccess("Post created successfully!");
-      setShowCreateModal(false);
-      setFiles([]);
-      setPreviewFiles([]);
-      setCaption("");
-      setPosts((prev) => [res.data.post, ...prev]);
-    } catch (err) {
-      console.error("Error creating post:", err);
-      setError("Failed to create post.");
-    } finally {
-      setUploading(false);
+      base64Files.push({
+        file: base64,
+        mimetype: file.type
+      });
     }
-  };
-  // LIKE / UNLIKE POST
+
+    const res = await instance.post(
+      "/post/create",
+      { caption, files: base64Files },
+      { 
+        withCredentials: true,
+        timeout: 600000  // 🔥 10 minutes timeout for large video uploads
+      }
+    );
+
+    // 🔥 SUCCESS MESSAGE
+    setSuccess("Post created successfully!");
+
+    // 🔥 Add new post instantly
+    setPosts((prev) => [res.data.post, ...prev]);
+
+    // 🔥 Clear form
+    setShowCreateModal(false);
+    setFiles([]);
+    setPreviewFiles([]);
+    setCaption("");
+
+  } catch (err) {
+    console.error("Error creating post:", err);
+    if (err.code === 'ECONNABORTED') {
+      setError("Upload timeout - video too large or internet too slow. Try a smaller file.");
+    } else if (err.response?.data?.message) {
+      setError(err.response.data.message);
+    } else {
+      setError("Failed to create post.");
+    }
+  } finally {
+    setUploading(false); // 🔥 Stop Loader Here
+  }
+};
+
+  
+  
+  
+  
   const handleToggleLike = async (postId) => {
     try {
       // Optimistic UI update

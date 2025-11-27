@@ -90,31 +90,12 @@ const Login = () => {
     }
 
   
-    if (name === "password") {
-      let strength = 0;
-      if (value.length >= 8) strength++;
-      if (/[A-Z]/.test(value)) strength++;
-      if (/[a-z]/.test(value)) strength++;
-      if (/[0-9]/.test(value)) strength++;
-      if (/[^A-Za-z0-9]/.test(value)) strength++;
-      setPasswordStrength(strength);
-      setPasswordError(
-        value.length < 8 ? "Password must be at least 8 characters" : ""
-      );
-    }
+   
   };
 
-  const getPasswordStrengthColor = () => {
-    if (passwordStrength <= 2) return "bg-red-500";
-    if (passwordStrength <= 3) return "bg-yellow-500";
-    return "bg-green-500";
-  };
+ 
 
-  const getPasswordStrengthText = () => {
-    if (passwordStrength <= 2) return "Weak";
-    if (passwordStrength <= 3) return "Medium";
-    return "Strong";
-  };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -235,30 +216,7 @@ const Login = () => {
 
             {passwordError && <p className="text-red-500 text-xs mt-1">{passwordError}</p>}
 
-            {formData.password && (
-              <div className="w-full mt-1 mb-2">
-                <div className="flex justify-between text-xs text-slate-600">
-                  <span>Password Strength:</span>
-                  <span
-                    className={`font-medium ${
-                      passwordStrength <= 2
-                        ? "text-red-500"
-                        : passwordStrength <= 3
-                        ? "text-yellow-500"
-                        : "text-green-500"
-                    }`}
-                  >
-                    {getPasswordStrengthText()}
-                  </span>
-                </div>
-                <div className="w-full bg-slate-200 h-2 rounded-full">
-                  <div
-                    className={`h-2 rounded-full transition-all duration-300 ${getPasswordStrengthColor()}`}
-                    style={{ width: `${(passwordStrength / 5) * 100}%` }}
-                  ></div>
-                </div>
-              </div>
-            )}
+           
 
             {message.text && (
               <p

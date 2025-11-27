@@ -6,9 +6,9 @@ import {
   getAllPosts,
   getUserPosts,
   deletePost,
-  toggleLikePost,     // 🆕 Added
-  addComment,         // 🆕 Added
-  getPostComments,    // 🆕 Added
+  toggleLikePost, // 🆕 Added
+  addComment, // 🆕 Added
+  getPostComments, // 🆕 Added
 } from "../controllers/postController.js";
 import { verifyToken } from "../middleware/CheckToken.js";
 
@@ -16,7 +16,6 @@ const router = express.Router();
 
 // 📸 Create new post
 router.post("/create", verifyToken, uploadCloud.array("media", 10), createPost);
-
 
 // ❤️ Like/Unlike post
 router.post("/like/:id", toggleLikePost);
@@ -50,8 +49,12 @@ router.get("/:id", async (req, res) => {
     const cleanPost = {
       ...post,
       _id: String(post._id),
-      author: post.author ? { ...post.author, _id: String(post.author._id) } : null,
-      likes: (post.likes || []).map((l) => (typeof l === "string" ? l : String(l))),
+      author: post.author
+        ? { ...post.author, _id: String(post.author._id) }
+        : null,
+      likes: (post.likes || []).map((l) =>
+        typeof l === "string" ? l : String(l)
+      ),
       comments: (post.comments || []).map((c) => ({
         ...c,
         _id: String(c._id),
@@ -65,9 +68,6 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-
 // GET ALL POSTS (Public Feed)
-
-
 
 export default router;

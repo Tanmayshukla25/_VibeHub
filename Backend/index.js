@@ -32,8 +32,8 @@ app.use(
   })
 );
 app.use(cookieParser());
-app.use(express.json({ limit: "50mb" }));
-app.use(express.urlencoded({ limit: "50mb", extended: true }));
+app.use(express.json({ limit: "500mb" }));
+app.use(express.urlencoded({ limit: "500mb", extended: true }));
 
 // ✅ Your existing routes
 app.use("/user", userRouter);
@@ -152,7 +152,6 @@ const io = new Server(server, {
 
 // ====================== SERVER START ======================
 
-
 io.on("connection", (socket) => {
   console.log("🟢 New client connected:", socket.id);
 
@@ -261,6 +260,5 @@ io.on("connection", (socket) => {
     console.log("🔴 Disconnected:", socket.id);
   });
 });
-
 
 server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
