@@ -25,6 +25,11 @@ const ChatRoom = () => {
   const [gifs, setGifs] = useState([]);
   const [gifSearch, setGifSearch] = useState("");
   const messagesEndRef = useRef(null);
+
+  const [isTyping, setIsTyping] = useState(false);
+  const [typingUser, setTypingUser] = useState(null);
+  let typingTimeout = useRef(null);
+
   const navigate = useNavigate();
 
   const normalizeId = (id) => {
@@ -134,6 +139,22 @@ const ChatRoom = () => {
     if (showGifPicker) fetchGifs("trending");
   }, [showGifPicker]);
 
+  const handleTyping = () => {
+    socket.emit("typing", {
+      conversationId,
+      senderId: user._id,
+    });
+
+    if (typingTimeout.current) clearTimeout(typingTimeout.current);
+
+    typingTimeout.current = setTimeout(() => {
+      socket.emit("stop_typing", {
+        conversationId,
+        senderId: user._id,
+      });
+    }, 800);
+  };
+
   // ✅ Send message (text/gif/file)
   const handleSend = async (override = null) => {
     if (!user) return;
@@ -227,6 +248,29 @@ const ChatRoom = () => {
     setShowGifPicker(false);
     setShowEmojiPicker(false);
   };
+
+  useEffect(() => {
+    if (!conversationId || !user) return;
+
+    socket.on("typing", ({ senderId }) => {
+      if (senderId !== user._id) {
+        setTypingUser(senderId);
+        setIsTyping(true);
+      }
+    });
+
+    socket.on("stop_typing", ({ senderId }) => {
+      if (senderId !== user._id) {
+        setIsTyping(false);
+        setTypingUser(null);
+      }
+    });
+
+    return () => {
+      socket.off("typing");
+      socket.off("stop_typing");
+    };
+  }, [conversationId, user]);
 
   return (
     <div className="flex flex-col min-h-screen pb-[100px] bg-white relative">
@@ -433,6 +477,20 @@ const ChatRoom = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      {isTyping && (
+  <div className="flex items-center ml-12 mt-[-4px] gap-2">
+    {/* Text */}
+    <span className="text-xs text-gray-700 font-medium">typing</span>
+
+    {/* Dots */}
+    <div className="flex items-center gap-1">
+      <span className="w-2 h-2 rounded-full bg-gray-600 animate-bounce [animation-delay:-0.3s]"></span>
+      <span className="w-2 h-2 rounded-full bg-gray-600 animate-bounce [animation-delay:-0.15s]"></span>
+      <span className="w-2 h-2 rounded-full bg-gray-600 animate-bounce"></span>
+    </div>
+  </div>
+)}
+
 
       {/* Input Bar */}
       <div className="fixed md:bottom-0 bottom-3  w-full sm:w-[84%] z-100 bg-[#719FB0] py-2.5 px-1.5 sm:p-3 border-t border-gray-200">
@@ -528,7 +586,10 @@ const ChatRoom = () => {
           <input
             type="text"
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={(e) => {
+              setText(e.target.value);
+              handleTyping();
+            }}
             placeholder="Type a message..."
             className="flex-1 px-4 py-2 border rounded-[8px]  md:rounded-[10px] mr-1 bg-white focus:outline-none focus:ring-1 focus:ring-[#5b899a] text-sm sm:text-base"
             onKeyDown={(e) => e.key === "Enter" && handleSend()}

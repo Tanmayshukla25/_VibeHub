@@ -45,6 +45,10 @@ export const createPost = async (req, res) => {
 
     await newPost.save();
 
+      await User.findByIdAndUpdate(author, {
+      $push: { posts: newPost._id }
+    });
+
     res.status(201).json({ message: "Post created", post: newPost });
   } catch (error) {
     console.error(error);

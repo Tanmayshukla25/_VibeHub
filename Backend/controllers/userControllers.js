@@ -74,7 +74,11 @@ export const getUserById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const user = await User.findById(id).select("-password");
+    const user = await User.findById(id)
+      .select("-password -verificationCode -verificationCodeExpires")
+      .populate("posts", "_id caption media createdAt")
+      .populate("followers", "_id username profilePic")
+      .populate("following", "_id username profilePic");
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -321,6 +325,7 @@ export const getMyProfile = async (req, res) => {
     // Use the imported `User` model (default import name at top of file)
     const user = await User.findById(userId)
       .select("-password -verificationCode -verificationCodeExpires")
+      
       .populate("followers", "username name profilePic")
       .populate("following", "username name profilePic");
     res.status(200).json({ user });

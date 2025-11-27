@@ -62,8 +62,6 @@ const UserProfile = () => {
   const [files, setFiles] = useState([]);
   const [previewFiles, setPreviewFiles] = useState([]);
   const [posts, setPosts] = useState([]);
-  const [videoModalOpen, setVideoModalOpen] = useState(false);
-  const [currentVideoSrc, setCurrentVideoSrc] = useState(null);
   const [doubleTapPostId, setDoubleTapPostId] = useState(null);
 
   const [commentModalOpen, setCommentModalOpen] = useState(false);

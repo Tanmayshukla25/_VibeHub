@@ -52,6 +52,107 @@ const io = new Server(server, {
   cors: { origin: allowedOrigins, credentials: true },
 });
 
+// io.on("connection", (socket) => {
+//   console.log("🟢 New client connected:", socket.id);
+
+//   // Join personal user room
+//   socket.on("join_user", (userId) => {
+//     socket.join(userId);
+//     console.log(`👤 User ${userId} joined personal room`);
+//   });
+
+//   // Join conversation room
+//   socket.on("join_conversation", (conversationId) => {
+//     socket.join(conversationId);
+//     console.log(`💬 Joined conversation ${conversationId}`);
+//   });
+
+//   // Handle sending messages
+//   socket.on("send_message", async (data) => {
+//     const {
+//       conversationId,
+//       sender,
+//       text,
+//       tempId,
+//       type,
+//       fileUrl,
+//       fileType,
+//       fileName,
+//       postId,
+//     } = data;
+
+//     try {
+//       const conversation = await Conversation.findById(conversationId);
+//       if (!conversation) return;
+
+//       // ✅ Determine message type
+//       const messageType =
+//         type ||
+//         (fileUrl
+//           ? fileType?.startsWith("image")
+//             ? "image"
+//             : fileType?.startsWith("video")
+//             ? "video"
+//             : "file"
+//           : "text");
+
+//       // ✅ Build message
+//       const newMessage = {
+//         sender,
+//         text: text || "",
+//         type: messageType,
+//         fileUrl: fileUrl || "",
+//         fileType: fileType || "",
+//         fileName: fileName || "",
+//         postId: postId || null,
+//       };
+
+//       // ✅ Save message in DB
+//       conversation.messages.push(newMessage);
+//       await conversation.save();
+
+//       // ✅ Fetch updated conversation with populated fields
+//       const updatedConv = await Conversation.findById(conversationId)
+//         .populate("participants", "username name profilePic")
+//         .populate("messages.sender", "username name profilePic")
+//         .populate({
+//           path: "messages.postId",
+//           select: "media caption author",
+//           populate: { path: "author", select: "username profilePic" }
+//         });
+
+//       const populatedMsg = updatedConv.messages[updatedConv.messages.length - 1];
+
+//       // ✅ Emit to users in the chat room
+//       io.to(conversationId).emit("receive_message", {
+//         ...populatedMsg.toObject(),
+//         conversationId,
+//         tempId,
+//       });
+
+//       // ✅ Notify other users
+//       conversation.participants.forEach((pId) => {
+//         if (pId.toString() !== sender.toString()) {
+//           io.to(pId.toString()).emit("receive_message_notification", {
+//             conversationId,
+//             sender,
+//             text,
+//           });
+//         }
+//       });
+//     } catch (err) {
+//       console.error("❌ Message error:", err.message);
+//     }
+//   });
+
+//   socket.on("disconnect", () => {
+//     console.log("🔴 Disconnected:", socket.id);
+//   });
+// });
+
+// ====================== SERVER START ======================
+
+
 io.on("connection", (socket) => {
   console.log("🟢 New client connected:", socket.id);
 
@@ -65,6 +166,21 @@ io.on("connection", (socket) => {
   socket.on("join_conversation", (conversationId) => {
     socket.join(conversationId);
     console.log(`💬 Joined conversation ${conversationId}`);
+  });
+
+  // ⭐ REAL-TIME TYPING INDICATOR (NEW)
+  socket.on("typing", ({ conversationId, senderId }) => {
+    socket.to(conversationId).emit("typing", {
+      senderId,
+      conversationId,
+    });
+  });
+
+  socket.on("stop_typing", ({ conversationId, senderId }) => {
+    socket.to(conversationId).emit("stop_typing", {
+      senderId,
+      conversationId,
+    });
   });
 
   // Handle sending messages
@@ -85,7 +201,7 @@ io.on("connection", (socket) => {
       const conversation = await Conversation.findById(conversationId);
       if (!conversation) return;
 
-      // ✅ Determine message type
+      // Determine message type
       const messageType =
         type ||
         (fileUrl
@@ -96,7 +212,6 @@ io.on("connection", (socket) => {
             : "file"
           : "text");
 
-      // ✅ Build message
       const newMessage = {
         sender,
         text: text || "",
@@ -107,30 +222,27 @@ io.on("connection", (socket) => {
         postId: postId || null,
       };
 
-      // ✅ Save message in DB
       conversation.messages.push(newMessage);
       await conversation.save();
 
-      // ✅ Fetch updated conversation with populated fields
       const updatedConv = await Conversation.findById(conversationId)
         .populate("participants", "username name profilePic")
         .populate("messages.sender", "username name profilePic")
         .populate({
           path: "messages.postId",
           select: "media caption author",
-          populate: { path: "author", select: "username profilePic" }
+          populate: { path: "author", select: "username profilePic" },
         });
 
-      const populatedMsg = updatedConv.messages[updatedConv.messages.length - 1];
+      const populatedMsg =
+        updatedConv.messages[updatedConv.messages.length - 1];
 
-      // ✅ Emit to users in the chat room
       io.to(conversationId).emit("receive_message", {
         ...populatedMsg.toObject(),
         conversationId,
         tempId,
       });
 
-      // ✅ Notify other users
       conversation.participants.forEach((pId) => {
         if (pId.toString() !== sender.toString()) {
           io.to(pId.toString()).emit("receive_message_notification", {
@@ -150,5 +262,5 @@ io.on("connection", (socket) => {
   });
 });
 
-// ====================== SERVER START ======================
+
 server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

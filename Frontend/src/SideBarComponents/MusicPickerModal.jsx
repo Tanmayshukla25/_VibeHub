@@ -17,7 +17,7 @@ const MusicPickerModal = ({ isOpen, onClose, onSelect }) => {
       const res = await fetch(
         `https://itunes.apple.com/search?term=${encodeURIComponent(
           query
-        )}&entity=song&limit=20`
+        )}&entity=song&limit=100`
       );
       const data = await res.json();
       setSongs(data.results || []);

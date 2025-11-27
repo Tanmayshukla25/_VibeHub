@@ -19,7 +19,6 @@ import { VscMute, VscUnmute } from "react-icons/vsc";
 import { useNavigate } from "react-router-dom";
 import FollowersList from "./FollowersList";
 
-
 const MusicPickerModal = ({ isOpen, onClose, onSelect }) => {
   const [query, setQuery] = useState("");
   const [songs, setSongs] = useState([]);
@@ -87,9 +86,7 @@ const MusicPickerModal = ({ isOpen, onClose, onSelect }) => {
 
           {/* SONG LIST */}
           <div className="max-h-80 overflow-y-auto space-y-2">
-            {loading && (
-              <p className="text-center text-gray-500">Searching…</p>
-            )}
+            {loading && <p className="text-center text-gray-500">Searching…</p>}
 
             {!loading &&
               songs.map((s) => (
@@ -178,7 +175,8 @@ const StoryUploadModal = ({ isOpen, onClose, onUploaded }) => {
       onClose();
     } catch (err) {
       console.error("❌ Upload error:", err);
-      const errorMsg = err.response?.data?.details || err.message || "Upload failed";
+      const errorMsg =
+        err.response?.data?.details || err.message || "Upload failed";
       alert(`Story upload error: ${errorMsg}`);
     } finally {
       setUploading(false);
@@ -201,14 +199,20 @@ const StoryUploadModal = ({ isOpen, onClose, onUploaded }) => {
         >
           {/* HEADER */}
           <div className="flex items-center justify-between px-4 py-3 border-b bg-[#719FB0] text-white">
-            <button onClick={onClose}><X size={22} /></button>
+            <button onClick={onClose}>
+              <X size={22} />
+            </button>
             <h2 className="font-semibold">Create Story</h2>
             <button
               onClick={handleUpload}
               disabled={!file || uploading}
-              className="bg-white text-pink-600 px-4 py-1 rounded-full"
+              className="bg-white text-pink-600 px-4 py-1 rounded-full flex items-center justify-center"
             >
-              {uploading ? "Uploading…" : "Share"}
+              {uploading ? (
+                <span className="w-5 h-5 border-2 border-pink-600 border-t-transparent rounded-full animate-spin"></span>
+              ) : (
+                "Share"
+              )}
             </button>
           </div>
 
@@ -218,7 +222,11 @@ const StoryUploadModal = ({ isOpen, onClose, onUploaded }) => {
             <div className="rounded-xl border border-dashed flex items-center justify-center min-h-[180px]">
               {previewUrl ? (
                 isVideo ? (
-                  <video src={previewUrl} className="w-full rounded-lg" controls />
+                  <video
+                    src={previewUrl}
+                    className="w-full rounded-lg"
+                    controls
+                  />
                 ) : (
                   <img src={previewUrl} className="w-full rounded-lg" alt="" />
                 )
@@ -269,14 +277,8 @@ const StoryUploadModal = ({ isOpen, onClose, onUploaded }) => {
   );
 };
 
-
 // ===================== Story Viewer (Fullscreen) =====================
-const StoryViewer = ({
-  isOpen,
-  onClose,
-  storyGroups,
-  startUserId,
-}) => {
+const StoryViewer = ({ isOpen, onClose, storyGroups, startUserId }) => {
   const [userIndex, setUserIndex] = useState(0);
   const [storyIndex, setStoryIndex] = useState(0);
   const [progress, setProgress] = useState(0); // 0 - 100
@@ -288,9 +290,7 @@ const StoryViewer = ({
   // set initial user group
   useEffect(() => {
     if (!isOpen || !storyGroups || storyGroups.length === 0) return;
-    const idx = storyGroups.findIndex(
-      (g) => g.user?._id === startUserId
-    );
+    const idx = storyGroups.findIndex((g) => g.user?._id === startUserId);
     setUserIndex(idx === -1 ? 0 : idx);
     setStoryIndex(0);
     setProgress(0);
@@ -460,14 +460,8 @@ const StoryViewer = ({
 
             {/* tap zones */}
             <div className="absolute inset-0 flex">
-              <div
-                className="w-1/3 h-full"
-                onClick={handlePrev}
-              ></div>
-              <div
-                className="w-2/3 h-full"
-                onClick={handleNext}
-              ></div>
+              <div className="w-1/3 h-full" onClick={handlePrev}></div>
+              <div className="w-2/3 h-full" onClick={handleNext}></div>
             </div>
 
             {/* Song chip */}
@@ -840,9 +834,7 @@ const FrontPage = () => {
     return arr;
   })();
 
-  const myStoryGroup = storyGroups.find(
-    (g) => g.user?._id === loggedInUserId
-  );
+  const myStoryGroup = storyGroups.find((g) => g.user?._id === loggedInUserId);
   const hasMyStories = !!myStoryGroup;
 
   const handleOpenStoryViewerForUser = (userId) => {
@@ -876,7 +868,8 @@ const FrontPage = () => {
                   <div className="w-full h-full rounded-full bg-white p-[2px]">
                     <img
                       src={
-                        loggedUser?.profilePic || loggedUser?.profilepic ||
+                        loggedUser?.profilePic ||
+                        loggedUser?.profilepic ||
                         defaultPic
                       }
                       className="w-full h-full rounded-full object-cover"
@@ -906,9 +899,7 @@ const FrontPage = () => {
                 <div
                   key={group.user?._id}
                   className="flex flex-col items-center cursor-pointer"
-                  onClick={() =>
-                    handleOpenStoryViewerForUser(group.user?._id)
-                  }
+                  onClick={() => handleOpenStoryViewerForUser(group.user?._id)}
                 >
                   <div className="w-16 h-16 rounded-full p-[2px] bg-gradient-to-tr from-pink-500 via-red-500 to-yellow-400">
                     <div className="w-full h-full rounded-full bg-white p-[2px]">
@@ -1135,9 +1126,7 @@ const FrontPage = () => {
               </p>
 
               <p className="px-4 font-semibold text-gray-600 text-sm">
-                {activeComments[post._id]?.length ||
-                  post.comments?.length ||
-                  0}{" "}
+                {activeComments[post._id]?.length || post.comments?.length || 0}{" "}
                 comments
               </p>
 
@@ -1278,5 +1267,3 @@ const FrontPage = () => {
 };
 
 export default FrontPage;
-
-

@@ -37,13 +37,11 @@
 // router.get("/:id", getUserById);
 // router.put("/update/:id", uploadCloud.single("profilePic"), updateFullProfile);
 
-
 // router.get("/me", verifyToken, getMyProfile);
 
 // // ⚠️ Keep this LAST, always
 // router.get("/:id", getUserById);
 // export default router;
-
 
 import express from "express";
 import {
@@ -84,7 +82,11 @@ router.post("/verify-code", verifyCode);
 
 // Profile update
 router.put("/update-dob", updateDOB);
-router.put("/update-profile/:id", uploadCloud.single("profilePic"), updateProfile);
+router.put(
+  "/update-profile/:id",
+  uploadCloud.single("profilePic"),
+  updateProfile
+);
 router.put("/update/:id", uploadCloud.single("profilePic"), updateFullProfile);
 
 // ---------- ALWAYS KEEP THIS LAST ----------

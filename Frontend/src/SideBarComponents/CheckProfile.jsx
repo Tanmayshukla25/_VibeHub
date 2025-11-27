@@ -20,6 +20,8 @@ const CheckProfile = () => {
           withCredentials: true,
         });
         setUser(res.data.user);
+        console.log(res.data.user);
+        
       } catch (err) {
         console.error("Error fetching user:", err);
         setError("Failed to load user profile.");
@@ -141,7 +143,7 @@ const CheckProfile = () => {
           <div className="grid grid-cols-3 gap-4 mt-2 sm:mt-6 max-w-xs mx-auto">
             <div className="text-center p-3 rounded-xl bg-slate-50 border border-slate-100">
               <p className="text-[17px] sm:text-2xl font-bold text-slate-800">
-                {user?.posts?.length || 0}
+                {Array.isArray(user?.posts) ? user.posts.length : 0}
               </p>
               <p className="text-[12px] sm:text-sm text-slate-600">Posts</p>
             </div>
@@ -152,7 +154,7 @@ const CheckProfile = () => {
               className="cursor-pointer text-center p-3 rounded-xl bg-slate-50 border border-slate-100 hover:bg-gradient-to-br hover:from-[#4A7C8C]/10 hover:to-[#1D5464]/10 transition-all"
             >
               <p className="text-[17px] sm:text-2xl font-bold text-slate-800">
-                {user?.followers?.length || 0}
+                {Array.isArray(user?.followers) ? user.followers.length : 0}
               </p>
               <p className="text-[12px] sm:text-sm text-slate-600">Followers</p>
             </div>
@@ -163,7 +165,7 @@ const CheckProfile = () => {
               className="cursor-pointer text-center p-3 rounded-xl bg-slate-50 border border-slate-100 hover:bg-gradient-to-br hover:from-[#4A7C8C]/10 hover:to-[#1D5464]/10 transition-all"
             >
               <p className="text-[17px] sm:text-2xl font-bold text-slate-800">
-                {user?.following?.length || 0}
+                {Array.isArray(user?.following) ? user.following.length : 0}
               </p>
               <p className="text-[12px] sm:text-sm text-slate-600">Following</p>
             </div>
